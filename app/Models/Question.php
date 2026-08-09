@@ -18,6 +18,7 @@ class Question extends Model
         'survey_id',
         'tipe_pertanyaan',
         'teks_pertanyaan',
+        'deskripsi_pertanyaan',
         'opsi_jawaban',
         'wajib_diisi',
         'urutan',

@@ -5,15 +5,23 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Survey;
 use App\Models\Respondent;
+use App\Services\GeminiAiService;
 use App\Exports\SurveyRawExport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AnalyticsController extends Controller
 {
+    protected GeminiAiService $aiService;
+
+    public function __construct(GeminiAiService $aiService)
+    {
+        $this->aiService = $aiService;
+    }
+
     public function show(Request $request, $id)
     {
-        $survey = Survey::with(['questions', 'respondents.answers'])->findOrFail($id);
+        $survey = Survey::with(['questions.answers', 'respondents.answers'])->findOrFail($id);
 
         $query = $survey->respondents();
 
@@ -72,31 +80,33 @@ class AnalyticsController extends Controller
                     break;
 
                 case 'LIKERT':
-                    $counts = ['1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0];
-                    $sum = 0;
-                    $n   = 0;
+                    $counts = ['5' => 0, '4' => 0, '3' => 0, '2' => 0, '1' => 0];
                     foreach ($answers as $ans) {
                         preg_match('/^[1-5]/', $ans, $m);
                         $digit = $m[0] ?? null;
                         if ($digit && isset($counts[$digit])) {
                             $counts[$digit]++;
-                            $sum += (int) $digit;
-                            $n++;
                         }
                     }
-                    $item['counts']  = $counts;
-                    $item['average'] = $n > 0 ? number_format($sum / $n, 2) : '0.00';
+                    $item['counts']      = $counts;
+                    $item['raw_answers'] = $answers;
                     break;
 
                 case 'NUMBER':
                     $nums = array_map('floatval', array_filter($answers, 'is_numeric'));
-                    $cnt  = count($nums);
+                    $priceCounts = [];
+                    foreach ($nums as $num) {
+                        $pKey = 'Rp ' . number_format($num, 0, ',', '.');
+                        $priceCounts[$pKey] = ($priceCounts[$pKey] ?? 0) + 1;
+                    }
+                    ksort($priceCounts);
+                    $item['counts'] = $priceCounts;
                     $item['stats'] = [
-                        'count'   => $cnt,
-                        'min'     => $cnt > 0 ? min($nums) : 0,
-                        'max'     => $cnt > 0 ? max($nums) : 0,
-                        'average' => $cnt > 0 ? round(array_sum($nums) / $cnt) : 0,
+                        'count' => count($nums),
+                        'min'   => count($nums) > 0 ? min($nums) : 0,
+                        'max'   => count($nums) > 0 ? max($nums) : 0,
                     ];
+                    $item['raw_answers'] = $answers;
                     break;
 
                 default:
@@ -108,11 +118,15 @@ class AnalyticsController extends Controller
             $analytics[] = $item;
         }
 
+        // Generate AI analysis for unified display alongside answer choice data
+        $aiAnalysis = $this->aiService->generateAnalysis($survey);
+
         return view('admin.surveys.analytics', compact(
             'survey',
             'respondents',
             'totalRespondents',
-            'analytics'
+            'analytics',
+            'aiAnalysis'
         ));
     }
 

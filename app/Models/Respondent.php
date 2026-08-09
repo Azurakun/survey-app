@@ -24,6 +24,12 @@ class Respondent extends Model
         'submitted_at' => 'datetime',
     ];
 
+    public function getSubmittedAtFormattedAttribute()
+    {
+        $date = $this->submitted_at ?? $this->created_at;
+        return $date ? $date->setTimezone('Asia/Jakarta')->format('d M Y, H:i') : '-';
+    }
+
     protected static function boot()
     {
         parent::boot();

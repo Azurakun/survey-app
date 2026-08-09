@@ -14,6 +14,10 @@ return new class extends Migration
             $table->string('judul');
             $table->text('deskripsi')->nullable();
             $table->string('status')->default('DRAFT'); // DRAFT, PUBLISHED, CLOSED
+            $table->boolean('accepting_responses')->default(true);
+            $table->timestamp('closed_at')->nullable();
+            $table->text('custom_closed_message')->nullable();
+            $table->boolean('limit_one_response')->default(true);
             $table->date('tanggal_mulai')->nullable();
             $table->date('tanggal_selesai')->nullable();
             $table->timestamps();

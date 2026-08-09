@@ -9,12 +9,12 @@ use App\Models\Survey;
 use App\Models\Question;
 use App\Models\Respondent;
 use App\Models\Answer;
+use Carbon\Carbon;
 
-class DatabaseSeeder extends Seeder
+class SampleSurveysSeeder extends Seeder
 {
     public function run(): void
     {
-        // ─── Admin User ────────────────────────────────────────────────
         $admin = User::firstOrCreate(
             ['email' => 'admin@smkn2indramayu.sch.id'],
             [
@@ -22,9 +22,6 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('admin123'),
             ]
         );
-
-        // Wipe old survey data to populate 3 brand new 180-degree distinct surveys
-        Survey::query()->delete();
 
         // ═════════════════════════════════════════════════════════════════════
         // SURVEY 1: KULINER & OLAHAN MANGGA INOVATIF (34 RESPONDEN)
@@ -120,7 +117,7 @@ class DatabaseSeeder extends Seeder
             $singleVal = $singles1[($i - 1) % count($singles1)];
             $multiVal  = $multis1[($i - 1) % count($multis1)];
             $likertVal = (string) rand(3, 5);
-            if ($i % 7 === 0) $likertVal = '2';
+            if ($i % 7 === 0) $likertVal = '2'; // Realistic variance
             $priceVal  = $prices1[($i - 1) % count($prices1)];
             $chanVal   = $channels1[($i - 1) % count($channels1)];
             $feedVal   = $feedbacks1[($i - 1) % count($feedbacks1)];
@@ -353,6 +350,6 @@ class DatabaseSeeder extends Seeder
             Answer::create(['respondent_id' => $resp->id, 'question_id' => $q3_6->id, 'jawaban' => $feedVal]);
         }
 
-        $this->command->info('[OK] DatabaseSeeder selesai: 3 Survey dengan 34, 32, dan 35 Responden.');
+        $this->command->info('[OK] SampleSurveysSeeder selesai: 3 Survey dengan 34, 32, dan 35 Responden.');
     }
 }

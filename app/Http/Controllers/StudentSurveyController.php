@@ -11,58 +11,60 @@ use Illuminate\Support\Facades\Storage;
 
 class StudentSurveyController extends Controller
 {
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $survey = Survey::with(['questions' => function ($q) {
             $q->orderBy('urutan', 'asc');
         }])->findOrFail($id);
 
-        if ($survey->status !== 'PUBLISHED') {
-            return view('student.error', [
-                'message' => 'Survey ini sedang tidak aktif atau belum dibuka untuk umum.',
-                'survey'  => $survey,
-            ]);
-        }
+        $isClosed = !$survey->isAcceptingResponses();
+        $closedMessage = $survey->getClosedMessage();
+
+        $alreadySubmittedCookie = $request->cookie("survey_submitted_{$survey->id}");
+        $isAlreadySubmitted = $survey->limit_one_response && !empty($alreadySubmittedCookie);
 
         $formattedQuestions = $survey->questions->map(function ($q) {
             return [
-                'id'              => $q->id,
-                'tipe_pertanyaan' => $q->tipe_pertanyaan,
-                'teks_pertanyaan' => $q->teks_pertanyaan,
-                'opsi_jawaban'    => $q->opsi_jawaban,
-                'parsed_options'  => $q->parsed_options,
-                'wajib_diisi'     => (bool) $q->wajib_diisi,
-                'urutan'          => (int) $q->urutan,
+                'id'                   => $q->id,
+                'tipe_pertanyaan'      => $q->tipe_pertanyaan,
+                'teks_pertanyaan'      => $q->teks_pertanyaan,
+                'deskripsi_pertanyaan' => $q->deskripsi_pertanyaan ?? '',
+                'opsi_jawaban'         => $q->opsi_jawaban,
+                'parsed_options'       => $q->parsed_options,
+                'wajib_diisi'          => (bool) $q->wajib_diisi,
+                'urutan'               => (int) $q->urutan,
             ];
         });
 
-        return view('student.survey', compact('survey', 'formattedQuestions'));
+        return view('student.survey', compact('survey', 'formattedQuestions', 'isClosed', 'closedMessage', 'isAlreadySubmitted'));
     }
 
     public function submit(Request $request, $id)
     {
         $survey = Survey::with('questions')->findOrFail($id);
 
-        if ($survey->status !== 'PUBLISHED') {
-            return response()->json(['error' => 'Survey ini sudah tidak aktif.'], 403);
+        if (!$survey->isAcceptingResponses()) {
+            return response()->json(['error' => $survey->getClosedMessage()], 403);
         }
 
         // Validate NISN
         $request->validate([
-            'nisn' => 'required|string|min:5|max:20',
+            'nisn' => 'required|string|min:3|max:20',
         ]);
 
         $nisn = trim($request->nisn);
 
-        // Check duplicate submission
-        $existing = Respondent::where('survey_id', $survey->id)
-            ->where('nisn', $nisn)
-            ->first();
+        // Check duplicate submission ONLY IF limit_one_response is enabled by admin
+        if ($survey->limit_one_response) {
+            $existing = Respondent::where('survey_id', $survey->id)
+                ->where('nisn', $nisn)
+                ->first();
 
-        if ($existing) {
-            return response()->json([
-                'error' => "NISN {$nisn} sudah pernah mengisi survey ini sebelumnya. Setiap siswa hanya boleh mengisi satu kali.",
-            ], 422);
+            if ($existing) {
+                return response()->json([
+                    'error' => "NISN / Responden {$nisn} telah pernah menanggapi survey ini. Pembatasan 1x tanggapan diaktifkan.",
+                ], 422);
+            }
         }
 
         $answersData = $request->input('answers', []);
@@ -86,13 +88,13 @@ class StudentSurveyController extends Controller
             $respondent = Respondent::create([
                 'survey_id'    => $survey->id,
                 'nisn'         => $nisn,
-                'submitted_at' => now(),
+                'submitted_at' => now()->setTimezone('Asia/Jakarta'),
             ]);
 
             foreach ($survey->questions as $q) {
                 $value = null;
 
-                if ($q->tipe_pertanyaan === 'IMAGE_UPLOAD' && $request->hasFile("answers.{$q->id}")) {
+                if (in_array($q->tipe_pertanyaan, ['IMAGE_UPLOAD', 'FILE_UPLOAD']) && $request->hasFile("answers.{$q->id}")) {
                     $file  = $request->file("answers.{$q->id}");
                     $path  = $file->store('survey_uploads', 'public');
                     $value = Storage::url($path);
@@ -111,9 +113,15 @@ class StudentSurveyController extends Controller
             }
         });
 
-        return response()->json([
+        $res = response()->json([
             'success' => true,
             'message' => 'Jawaban survey Anda berhasil disimpan. Terima kasih atas partisipasi Anda!',
         ]);
+
+        if ($survey->limit_one_response) {
+            $res->cookie("survey_submitted_{$survey->id}", $nisn, 525600); // 1 year cookie
+        }
+
+        return $res;
     }
 }

@@ -19,14 +19,61 @@ class Survey extends Model
         'judul',
         'deskripsi',
         'status',
+        'accepting_responses',
+        'closed_at',
+        'custom_closed_message',
+        'limit_one_response',
         'tanggal_mulai',
         'tanggal_selesai',
     ];
 
     protected $casts = [
-        'tanggal_mulai'   => 'date',
-        'tanggal_selesai' => 'date',
+        'accepting_responses' => 'boolean',
+        'closed_at'           => 'datetime',
+        'limit_one_response'  => 'boolean',
+        'tanggal_mulai'       => 'date',
+        'tanggal_selesai'     => 'date',
     ];
+
+    /**
+     * Check if survey is currently accepting responses (GMT+7 Asia/Jakarta check)
+     */
+    public function isAcceptingResponses(): bool
+    {
+        if ($this->status !== 'PUBLISHED') {
+            return false;
+        }
+
+        if (array_key_exists('accepting_responses', $this->attributes) && !$this->accepting_responses) {
+            return false;
+        }
+
+        if (!empty($this->closed_at)) {
+            $nowWib = \Carbon\Carbon::now('Asia/Jakarta');
+            $closedAtWib = \Carbon\Carbon::parse($this->closed_at)->timezone('Asia/Jakarta');
+            if ($nowWib->greaterThanOrEqualTo($closedAtWib)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get customized or default closed message
+     */
+    public function getClosedMessage(): string
+    {
+        if (!empty($this->custom_closed_message)) {
+            return $this->custom_closed_message;
+        }
+
+        if (!empty($this->closed_at) && \Carbon\Carbon::now('Asia/Jakarta')->greaterThanOrEqualTo(\Carbon\Carbon::parse($this->closed_at)->timezone('Asia/Jakarta'))) {
+            return "Survey ini telah otomatis ditutup sesuai jadwal pada " . \Carbon\Carbon::parse($this->closed_at)->timezone('Asia/Jakarta')->format('d M Y H:i') . " WIB.";
+        }
+
+        return "Survey ini telah ditutup oleh pemilik survey dan tidak lagi menerima tanggapan baru.";
+    }
 
     protected static function boot()
     {

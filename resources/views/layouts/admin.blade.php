@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin — Survey Riset Pasar SMKN 2 Indramayu')</title>
+    <title>@yield('title', 'Admin — Survey Riset Pasar')</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Platform Survey Riset Pasar Kewirausahaan SMKN 2 Indramayu">
+    <meta name="description" content="Platform Survey Riset Pasar Kewirausahaan">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -17,40 +17,36 @@
             theme: {
                 extend: {
                     colors: {
-                        // Accent — amber/gold (dipakai tipis, bukan dominan)
                         accent: {
-                            DEFAULT: '#C9933A',
-                            light:   '#E8B86D',
-                            tint:    '#FBF4E8',
+                            DEFAULT: '#C89D54',
+                            light:   '#D9AB55',
+                            tint:    '#F8F4EC',
                         },
-                        // Danger
                         danger: {
                             DEFAULT: '#C0392B',
                             tint:    '#FDECEA',
                         },
-                        // Neutral greyscale berbasis krem
                         ink: {
-                            DEFAULT: '#1A1714',   // teks utama
-                            muted:   '#6B6458',   // teks sekunder
-                            subtle:  '#A09488',   // placeholder
+                            DEFAULT: '#1C1917',
+                            muted:   '#6E675F',
+                            subtle:  '#A19A91',
                         },
                         surface: {
-                            DEFAULT: '#FFFFFF',   // card, sidebar
-                            raised:  '#FFFFFF',   // modal, dropdown
-                            base:    '#F5F2EC',   // background halaman
-                            subtle:  '#EDE8DF',   // hover, alt row
-                            border:  '#DDD7CC',   // border
-                            divider: '#EAE5DC',   // divider halus
+                            DEFAULT: '#FFFFFF',
+                            raised:  '#FFFFFF',
+                            base:    '#FAF8F5',
+                            subtle:  '#F4F0E8',
+                            border:  '#E5E0D8',
+                            divider: '#EBE6DE',
                         },
-                        // Tetap ada untuk chart colors
                         chart: {
-                            1: '#C9933A', 2: '#8B5E3C', 3: '#4A7A5E',
-                            4: '#6B8FAB', 5: '#A0846A', 6: '#7A6E8A',
+                            1: '#C89D54', 2: '#A37A3E', 3: '#786858',
+                            4: '#5B86A6', 5: '#938474', 6: '#685D75',
                         }
                     },
                     fontFamily: {
-                        serif: ['Fraunces', 'Georgia', 'serif'],
-                        sans:  ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+                        serif: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+                        sans:  ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
                     },
                 }
             }
@@ -64,34 +60,37 @@
     <style>
         * { box-sizing: border-box; }
         body {
-            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background-color: #F5F2EC;
-            color: #1A1714;
+            font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+            background-color: #FAF8F5;
+            color: #1C1917;
         }
-        .font-serif { font-family: 'Fraunces', Georgia, serif !important; }
+        .font-serif {
+            font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif !important;
+            letter-spacing: -0.02em;
+        }
 
         /* Scrollbar */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #EDE8DF; }
-        ::-webkit-scrollbar-thumb { background: #C9C0B0; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #C9933A; }
+        ::-webkit-scrollbar-track { background: #F4F0E8; }
+        ::-webkit-scrollbar-thumb { background: #D5CEC4; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #C89D54; }
 
         /* Sidebar active state */
         .nav-item {
             display: flex; align-items: center; gap: 10px;
             padding: 9px 12px; border-radius: 8px;
             font-size: 12px; font-weight: 600;
-            color: #6B6458; transition: all 0.15s ease;
+            color: #6E675F; transition: all 0.15s ease;
             text-decoration: none;
         }
-        .nav-item:hover { background: #EDE8DF; color: #1A1714; }
+        .nav-item:hover { background: #F4F0E8; color: #1C1917; }
         .nav-item.active {
-            background: #FBF4E8;
-            color: #1A1714;
-            border-left: 3px solid #C9933A;
+            background: #F8F4EC;
+            color: #1C1917;
+            border-left: 3px solid #C89D54;
             padding-left: 9px;
         }
-        .nav-item.active svg { color: #C9933A; }
+        .nav-item.active svg { color: #C89D54; }
 
         /* Animations */
         @keyframes popIn {
@@ -117,9 +116,9 @@
 
         /* Sidebar */
         .sidebar {
-            width: 240px; min-width: 240px;
+            width: 250px; min-width: 250px;
             background: #FFFFFF;
-            border-right: 1px solid #DDD7CC;
+            border-right: 1px solid #E5E0D8;
             display: flex; flex-direction: column;
             height: 100vh; position: sticky; top: 0;
             overflow: hidden;
@@ -128,15 +127,31 @@
         /* Page card */
         .card {
             background: #FFFFFF;
-            border: 1px solid #DDD7CC;
+            border: 1px solid #E5E0D8;
             border-radius: 12px;
+        }
+
+        /* Profile Menu Item Active State */
+        .profile-menu-card {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 10px;
+            background: #FAF8F5; border: 1px solid #E5E0D8;
+            transition: all 0.2s ease; text-decoration: none;
+        }
+        .profile-menu-card:hover {
+            background: #F8F4EC; border-color: #C89D54;
+            transform: translateY(-1px);
+        }
+        .profile-menu-card.active {
+            background: #F8F4EC; border-color: #C89D54;
+            box-shadow: 0 2px 4px rgba(200, 157, 84, 0.1);
         }
     </style>
 
     @yield('head')
 </head>
-<body class="min-h-screen antialiased" style="background:#F5F2EC;">
-<div x-data="{ sidebarOpen: false }" class="min-h-screen flex">
+<body class="min-h-screen antialiased" style="background:#FAF8F5;">
+<div x-data="{ sidebarOpen: false }" class="min-h-screen flex items-start">
 
     <!-- ── Mobile Overlay ─────────────────────────────────────────────── -->
     <div x-show="sidebarOpen"
@@ -153,23 +168,23 @@
 
     <!-- ── Sidebar ────────────────────────────────────────────────────── -->
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-           class="sidebar fixed top-0 bottom-0 left-0 z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto">
+           class="sidebar fixed top-0 bottom-0 left-0 z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-30 shrink-0">
 
         <!-- Logo / Branding -->
         <div class="px-5 py-4 border-b border-surface-divider flex items-center gap-3 shrink-0">
             <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                 style="background:#1A1714;">
-                <span class="font-serif font-bold text-xs" style="color:#C9933A;">SMK</span>
+                 style="background:#1C1917;">
+                <span class="font-serif font-bold text-xs" style="color:#C89D54;">RP</span>
             </div>
             <div class="min-w-0">
-                <div class="text-[9px] font-sans uppercase tracking-widest font-bold truncate" style="color:#A09488;">SMKN 2 INDRAMAYU</div>
+                <div class="text-[9px] font-sans uppercase tracking-widest font-bold truncate" style="color:#A19A91;">PLATFORM SURVEY</div>
                 <div class="font-serif text-sm font-bold leading-tight text-ink">Riset Pasar</div>
             </div>
         </div>
 
         <!-- Navigation -->
         <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-            <p class="text-[9px] font-sans uppercase tracking-widest font-bold px-3 pt-1 pb-2" style="color:#A09488;">MENU UTAMA</p>
+            <p class="text-[9px] font-sans uppercase tracking-widest font-bold px-3 pt-1 pb-2" style="color:#A19A91;">MENU UTAMA</p>
 
             <a href="{{ route('admin.dashboard') }}"
                class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -178,56 +193,60 @@
             </a>
 
             <a href="{{ route('admin.surveys.index') }}"
-               class="nav-item {{ request()->routeIs('admin.surveys.*') ? 'active' : '' }}">
+               class="nav-item {{ (request()->routeIs('admin.surveys.*') && !request()->routeIs('admin.surveys.analytics')) ? 'active' : '' }}">
                 <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
                 <span>Manajemen Survey</span>
             </a>
 
-            <a href="{{ route('admin.surveys.create') }}"
-               class="nav-item">
-                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 4v16m8-8H4"/></svg>
-                <span>Buat Survey Baru</span>
+            <a href="{{ route('admin.ai-analytics.index') }}"
+               class="nav-item {{ (request()->routeIs('admin.ai-analytics.*') || request()->routeIs('admin.surveys.analytics')) ? 'active' : '' }}">
+                <svg class="w-4 h-4 shrink-0" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                <span>Analisa</span>
+                <span class="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md border" style="background:#FAF6EE; border-color:#E5E0D8; color:#C89D54;">AI</span>
             </a>
         </nav>
 
-        <!-- Bottom Section: Profil + Logout -->
-        <div class="px-3 pb-4 shrink-0 space-y-1 border-t border-surface-divider pt-3">
+        <!-- Bottom Section: Profil & Akun Menu (Menyatukan info akun + link profil tepat diatas tombol Keluar) -->
+        <div class="px-3 pb-4 shrink-0 space-y-2 border-t border-surface-divider pt-3">
+            <p class="text-[9px] font-sans uppercase tracking-widest font-bold px-1 text-ink-subtle" style="color:#A19A91;">AKUN PENGELOLA</p>
 
-            <!-- User Identity -->
-            <div class="px-3 py-2.5 rounded-lg mb-1" style="background:#F5F2EC;">
-                <div class="text-[11px] font-bold truncate text-ink">{{ Auth::user()->name ?? 'Guru Pengelola' }}</div>
-                <div class="text-[10px] truncate" style="color:#A09488;">{{ Auth::user()->email ?? '' }}</div>
-            </div>
-
-            <!-- Profil & Akun (di atas tombol Keluar) -->
+            <!-- Unified Profile & Account Menu Card -->
             <a href="{{ route('admin.profile.show') }}"
-               class="nav-item {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
-                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                <span>Profil &amp; Akun</span>
+               class="profile-menu-card {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center font-serif font-bold text-xs shrink-0"
+                     style="background:#1C1917; color:#C89D54;">
+                    {{ Str::upper(Str::substr(Auth::user()->name ?? 'A', 0, 1)) }}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="text-[11px] font-bold truncate text-ink">{{ Auth::user()->name ?? 'Guru Pengelola' }}</div>
+                    <div class="text-[10px] truncate" style="color:#A19A91;">{{ Auth::user()->email ?? 'admin@domain.sch.id' }}</div>
+                </div>
+                <svg class="w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
             </a>
 
-            <!-- Logout -->
+            <!-- Logout Button -->
             <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
                 <button type="submit"
-                        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all
-                               text-danger hover:bg-danger-tint"
-                        style="color:#C0392B;">
+                        class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all border border-danger/20 hover:bg-danger-tint"
+                        style="color:#C0392B; background:#FAF8F5;">
                     <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                    <span>Keluar</span>
+                    <span>Keluar dari Akun</span>
                 </button>
             </form>
         </div>
     </aside>
 
     <!-- ── Main Content ───────────────────────────────────────────────── -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <div class="flex-1 flex flex-col min-w-0">
 
         <!-- Mobile Top Bar -->
         <header class="lg:hidden px-4 py-3 flex items-center justify-between sticky top-0 z-30 bg-white border-b border-surface-border">
             <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center font-serif font-bold text-xs"
-                     style="background:#1A1714; color:#C9933A;">
+                     style="background:#1C1917; color:#C89D54;">
                     SMK
                 </div>
                 <span class="font-serif font-bold text-sm text-ink">Riset Pasar SMKN 2</span>
@@ -239,7 +258,7 @@
         </header>
 
         <!-- Page Content -->
-        <main class="flex-1 p-5 sm:p-7 overflow-auto">
+        <main class="flex-1 p-5 sm:p-7">
 
             @if(session('success'))
                 <div class="mb-5 p-3.5 rounded-xl border text-xs font-semibold flex items-center gap-2.5 animate-pop-in"
