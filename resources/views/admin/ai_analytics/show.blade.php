@@ -45,7 +45,7 @@
                     <div class="px-2.5 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1.5"
                          style="background:#EDFAF2; border-color:#A3E6CD; color:#1A5C38;">
                         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span>gemini-3.5-flash</span>
+                        <span>gemini-2.5-flash</span>
                     </div>
                 </div>
 
@@ -97,7 +97,7 @@
              style="background:#FAF6EE; border-color:#E5E0D8; color:#C89D54;">
             <div class="flex items-center gap-2">
                 <span class="text-sm">⚡</span>
-                <span>Gemini AI (gemini-3.5-flash) sedang menganalisis {{ $kpis['total_respondents'] }} data responden dan menyusun dokumen rekomendasi...</span>
+                <span>Gemini AI (gemini-2.5-flash) sedang menganalisis {{ $kpis['total_respondents'] }} data responden dan menyusun dokumen rekomendasi...</span>
             </div>
             <span class="text-[10px] font-mono uppercase tracking-wider">Memproses JSON...</span>
         </div>
@@ -180,7 +180,7 @@
                     </div>
                     <div>
                         <span class="text-stone-400 uppercase text-[9px] block">ENGINE ANALISIS</span>
-                        <span class="font-bold text-amber-700">gemini-3.5-flash</span>
+                        <span class="font-bold text-amber-700">gemini-2.5-flash</span>
                     </div>
                 </div>
             </div>

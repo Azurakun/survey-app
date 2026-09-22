@@ -82,13 +82,13 @@
                     onmouseover="this.style.background='#2C2723';"
                     onmouseout="this.style.background='#1C1917';">
                 <svg class="w-3.5 h-3.5" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                <span>Publikasikan</span>
+                <span>Save</span>
             </button>
         </div>
     </div>
 
     <!-- ── Google Form Options Modal / Drawer ─────────────────────────── -->
-    <div x-show="showSettingsModal" x-cloak x-transition class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
+    <div x-show="showSettingsModal" x-cloak x-transition class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25">
         <div class="bg-white rounded-3xl border border-stone-300 max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-xl">
             <div class="flex items-center justify-between border-b pb-4 border-stone-200">
                 <div class="flex items-center gap-2">
@@ -176,7 +176,7 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100 scale-100"
          x-transition:leave-end="opacity-0 scale-95"
-         class="fixed inset-0 top-0 left-0 w-screen h-screen bg-black/60 backdrop-blur-xs z-[100] flex items-center justify-center p-4"
+         class="fixed inset-0 top-0 left-0 w-screen h-screen bg-black/25 z-[100] flex items-center justify-center p-4"
          style="display:none;">
 
         <div @click.away="showExitModal = false"
@@ -244,26 +244,26 @@
                 <div class="space-y-3">
                     <div>
                         <label class="block text-[10px] font-sans uppercase tracking-widest font-bold mb-1" style="color:#6E675F;">Judul Survey *</label>
-                        <input type="text" x-model="judul" placeholder="Misal: Riset Pasar Produk Kewirausahaan Siswa"
+                        <input type="text" x-model="judul" @input="markDirty()" placeholder="Misal: Riset Pasar Produk Kewirausahaan Siswa"
                                class="w-full px-4 py-3 border rounded-xl text-sm font-semibold text-ink transition focus:outline-none focus:ring-2"
                                style="background:#FAF8F5; border-color:#E5E0D8;">
                     </div>
                     <div>
                         <label class="block text-[10px] font-sans uppercase tracking-widest font-bold mb-1" style="color:#6E675F;">Deskripsi / Konteks</label>
-                        <textarea x-model="deskripsi" rows="2" placeholder="Jelaskan tujuan survey ini kepada responden..."
+                        <textarea x-model="deskripsi" @input="markDirty()" rows="2" placeholder="Jelaskan tujuan survey ini kepada responden..."
                                   class="w-full px-4 py-3 border rounded-xl text-sm text-ink resize-none transition focus:outline-none focus:ring-2"
                                   style="background:#FAF8F5; border-color:#E5E0D8;"></textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[10px] font-sans uppercase tracking-widest font-bold mb-1" style="color:#6E675F;">Tanggal Mulai</label>
-                            <input type="date" x-model="tanggalMulai"
+                            <input type="date" x-model="tanggalMulai" @change="markDirty()"
                                    class="w-full px-4 py-2.5 border rounded-xl text-sm text-ink focus:outline-none focus:ring-2"
                                    style="background:#FAF8F5; border-color:#E5E0D8;">
                         </div>
                         <div>
                             <label class="block text-[10px] font-sans uppercase tracking-widest font-bold mb-1" style="color:#6E675F;">Tanggal Selesai</label>
-                            <input type="date" x-model="tanggalSelesai"
+                            <input type="date" x-model="tanggalSelesai" @change="markDirty()"
                                    class="w-full px-4 py-2.5 border rounded-xl text-sm text-ink focus:outline-none focus:ring-2"
                                    style="background:#FAF8F5; border-color:#E5E0D8;">
                         </div>
@@ -273,7 +273,7 @@
 
             <!-- Questions List -->
             <div class="space-y-4">
-                <template x-for="(q, idx) in questions" :key="idx">
+                <template x-for="(q, idx) in questions" :key="q.id || ('temp_' + idx)">
                     <div class="card question-card transition-all duration-200"
                          draggable="true"
                          @dragstart="onDragStart(idx, $event)"
@@ -336,12 +336,12 @@
                         <div class="p-4 space-y-3">
                             <!-- Question Text & Required Checkbox -->
                             <div class="flex items-start gap-2">
-                                <textarea x-model="q.teks_pertanyaan" rows="2"
+                                <textarea x-model="q.teks_pertanyaan" @input="markDirty()" rows="2"
                                           :placeholder="'Teks Pertanyaan #' + (idx + 1) + '...'"
                                           class="flex-1 px-3 py-2.5 border rounded-xl text-sm text-ink resize-none transition focus:outline-none focus:ring-2"
                                           style="background:#FAF8F5; border-color:#E5E0D8;"></textarea>
                                 <label class="flex items-center gap-1.5 mt-2 shrink-0 cursor-pointer">
-                                    <input type="checkbox" x-model="q.wajib_diisi"
+                                    <input type="checkbox" x-model="q.wajib_diisi" @change="markDirty()"
                                            class="w-4 h-4 rounded border-gray-300 cursor-pointer" style="accent-color:#C89D54;">
                                     <span class="text-[10px] font-bold text-ink-muted whitespace-nowrap">Wajib</span>
                                 </label>
@@ -352,7 +352,7 @@
                                 <label class="block text-[10px] font-sans uppercase tracking-widest font-bold mb-1" style="color:#6E675F;">
                                     Deskripsi / Penjelasan Tambahan Pertanyaan (Opsional)
                                 </label>
-                                <input type="text" x-model="q.deskripsi_pertanyaan"
+                                <input type="text" x-model="q.deskripsi_pertanyaan" @input="markDirty()"
                                        placeholder="Misal: Berikan masukan yang jujur mengenai rasa dan kemasan produk..."
                                        class="w-full px-3 py-2 border rounded-lg text-xs text-ink transition focus:outline-none focus:ring-2"
                                        style="background:#FAF8F5; border-color:#E5E0D8;">
@@ -365,18 +365,18 @@
                                     <template x-for="(opt, optIdx) in q.opsi_jawaban" :key="optIdx">
                                         <div class="flex items-center gap-2">
                                             <span class="text-xs font-bold w-5 text-center" style="color:#6E675F;" x-text="optIdx + 1"></span>
-                                            <input type="text" x-model="q.opsi_jawaban[optIdx]"
+                                            <input type="text" x-model="q.opsi_jawaban[optIdx]" @input="markDirty()"
                                                    :placeholder="'Opsi ' + (optIdx + 1)"
                                                    class="flex-1 px-3 py-2 border rounded-lg text-xs transition focus:outline-none focus:ring-2"
                                                    style="background:#FAF8F5; border-color:#E5E0D8; color:#1C1917;">
-                                            <button @click="q.opsi_jawaban.splice(optIdx, 1)"
+                                            <button @click="q.opsi_jawaban.splice(optIdx, 1); markDirty();"
                                                     x-show="q.opsi_jawaban.length > 2"
                                                     class="p-1.5 rounded-lg transition" style="color:#C0392B;">
                                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                             </button>
                                         </div>
                                     </template>
-                                    <button @click="q.opsi_jawaban.push('')"
+                                    <button @click="q.opsi_jawaban.push('Opsi ' + (q.opsi_jawaban.length + 1)); markDirty();"
                                             class="flex items-center gap-1.5 text-xs font-bold transition mt-1"
                                             style="color:#C89D54;">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -630,28 +630,25 @@ function builderApp() {
             this.$watch('questions', () => this.markDirty(), { deep: true });
         },
 
-        markDirty() {
+        markDirty(immediate = false) {
             this.isDirty = true;
             this.autoSaveStatusText = 'Menunggu menyimpan...';
             clearTimeout(this._autoSaveTimer);
 
-            // Only auto-save if user has typed something in title, description, or questions
-            const hasContent = (this.judul && this.judul.trim() !== '') ||
-                               (this.deskripsi && this.deskripsi.trim() !== '') ||
-                               (this.questions && this.questions.some(q => q.teks_pertanyaan && q.teks_pertanyaan.trim() !== ''));
-
-            if (hasContent) {
+            if (immediate) {
+                this.triggerAutoSave();
+            } else {
                 this._autoSaveTimer = setTimeout(() => {
                     this.triggerAutoSave();
-                }, 1800);
+                }, 800);
             }
         },
 
         async toggleAcceptingResponses() {
             this.acceptingResponses = !this.acceptingResponses;
-            this.markDirty();
+            this.markDirty(true);
             try {
-                const res = await fetch("{{ route('admin.surveys.toggle-acceptance', $survey->id) }}", {
+                const res = await fetch("{{ route('admin.surveys.toggle-acceptance', $survey->id, false) }}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -669,12 +666,12 @@ function builderApp() {
         },
 
         async triggerAutoSave() {
-            if (!this.isDirty || this.saving || this.autoSaving) return;
+            if (this.saving || this.autoSaving) return;
             this.autoSaving = true;
             this.autoSaveStatusText = 'Menyimpan otomatis...';
 
             const payload = {
-                judul:                 this.judul,
+                judul:                 this.judul || 'Survey Tanpa Judul',
                 deskripsi:             this.deskripsi,
                 status:                this.status,
                 accepting_responses:   this.acceptingResponses,
@@ -687,7 +684,7 @@ function builderApp() {
             };
 
             try {
-                const res = await fetch("{{ route('admin.surveys.update', $survey->id) }}", {
+                const res = await fetch("{{ route('admin.surveys.update', $survey->id, false) }}", {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -697,16 +694,25 @@ function builderApp() {
                     body: JSON.stringify(payload)
                 });
 
-                if (res.ok) {
+                const json = await res.json().catch(() => ({}));
+
+                if (res.ok && json.success) {
                     this.isDirty = false;
+                    if (json.questions && Array.isArray(json.questions)) {
+                        json.questions.forEach((savedQ, i) => {
+                            if (this.questions[i]) {
+                                this.questions[i].id = savedQ.id;
+                            }
+                        });
+                    }
                     const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     this.autoSaveStatusText = 'Tersimpan otomatis (' + nowStr + ')';
                 } else {
-                    const json = await res.json().catch(() => ({}));
-                    console.warn('Auto-save failed:', json);
+                    console.warn('Auto-save response error:', json);
                     this.autoSaveStatusText = 'Gagal menyimpan: ' + (json.message || 'Coba lagi');
                 }
             } catch (e) {
+                console.error('Auto-save connection error:', e);
                 this.autoSaveStatusText = 'Gagal koneksi auto-save';
             } finally {
                 this.autoSaving = false;
@@ -717,7 +723,7 @@ function builderApp() {
             if (this.isDirty || (!this.judul && this.status === 'DRAFT')) {
                 this.showExitModal = true;
             } else {
-                window.location.href = "{{ route('admin.surveys.index') }}";
+                window.location.href = "{{ route('admin.surveys.index', [], false) }}";
             }
         },
 
@@ -725,26 +731,25 @@ function builderApp() {
             this.showExitModal = false;
             await this.saveSurvey('DRAFT');
             this.isDirty = false;
-            window.location.href = "{{ route('admin.surveys.index') }}";
+            window.location.href = "{{ route('admin.surveys.index', [], false) }}";
         },
 
         async discardAndExit() {
             this.showExitModal = false;
             this.isDirty = false; // Disable beforeunload trigger
             try {
-                await fetch("{{ route('admin.surveys.destroy', $survey->id) }}", {
-                    method: 'POST',
+                await fetch("{{ route('admin.surveys.destroy', $survey->id, false) }}", {
+                    method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'X-HTTP-Method-Override': 'DELETE'
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     }
                 });
             } catch (e) {
                 console.error('Error discarding draft:', e);
             }
-            window.location.href = "{{ route('admin.surveys.index') }}";
+            window.location.href = "{{ route('admin.surveys.index', [], false) }}";
         },
 
         showToast(msg) {
@@ -776,6 +781,7 @@ function builderApp() {
             this.questions = [...this.questions];
             this.showToast('Pertanyaan #' + (this.draggedIdx + 1) + ' dipindah ke posisi #' + (targetIdx + 1));
             this.draggedIdx = null;
+            this.markDirty(true);
         },
 
         onDragEnd() {
@@ -806,14 +812,18 @@ function builderApp() {
                 wajib_diisi: true,
                 urutan: this.questions.length + 1
             });
+            this.questions = [...this.questions];
             this.newlyAddedIdx = this.questions.length - 1;
             this.showToast('Pertanyaan #' + this.questions.length + ' ditambahkan');
             setTimeout(() => this.newlyAddedIdx = null, 1500);
+            this.markDirty(true);
         },
 
         removeQuestion(idx) {
             this.questions.splice(idx, 1);
+            this.questions = [...this.questions];
             this.showToast('Pertanyaan berhasil dihapus');
+            this.markDirty(true);
         },
 
         moveUp(idx) {
@@ -821,6 +831,7 @@ function builderApp() {
             [this.questions[idx - 1], this.questions[idx]] = [this.questions[idx], this.questions[idx - 1]];
             this.questions = [...this.questions];
             this.showToast('Pertanyaan dipindah ke atas');
+            this.markDirty(true);
         },
 
         moveDown(idx) {
@@ -828,6 +839,7 @@ function builderApp() {
             [this.questions[idx + 1], this.questions[idx]] = [this.questions[idx], this.questions[idx + 1]];
             this.questions = [...this.questions];
             this.showToast('Pertanyaan dipindah ke bawah');
+            this.markDirty(true);
         },
 
         changeType(q, newType) {
@@ -835,12 +847,14 @@ function builderApp() {
             if ((newType === 'SINGLE_CHOICE' || newType === 'MULTIPLE_CHOICE') && (!q.opsi_jawaban || q.opsi_jawaban.length === 0)) {
                 q.opsi_jawaban = ['Opsi 1', 'Opsi 2', 'Opsi 3'];
             }
+            this.markDirty(true);
         },
 
         async saveSurvey(targetStatus) {
             this.saving = true;
+            clearTimeout(this._autoSaveTimer);
             const payload = {
-                judul:                 this.judul,
+                judul:                 this.judul || 'Survey Tanpa Judul',
                 deskripsi:             this.deskripsi,
                 status:                targetStatus || this.status,
                 accepting_responses:   this.acceptingResponses,
@@ -853,7 +867,7 @@ function builderApp() {
             };
 
             try {
-                const res = await fetch("{{ route('admin.surveys.update', $survey->id) }}", {
+                const res = await fetch("{{ route('admin.surveys.update', $survey->id, false) }}", {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -863,14 +877,22 @@ function builderApp() {
                     body: JSON.stringify(payload)
                 });
 
-                if (res.ok) {
+                const json = await res.json().catch(() => ({}));
+
+                if (res.ok && json.success) {
                     this.status = targetStatus || this.status;
                     this.isDirty = false;
+                    if (json.questions && Array.isArray(json.questions)) {
+                        json.questions.forEach((savedQ, i) => {
+                            if (this.questions[i]) {
+                                this.questions[i].id = savedQ.id;
+                            }
+                        });
+                    }
                     const verb = targetStatus === 'PUBLISHED' ? 'Survey berhasil dipublikasikan' : 'Survey berhasil disimpan sebagai Draft';
                     this.autoSaveStatusText = 'Tersimpan';
                     this.showToast(verb);
                 } else {
-                    const json = await res.json().catch(() => ({}));
                     this.showToast('Gagal menyimpan: ' + (json.message || 'Coba lagi'));
                 }
             } catch (e) {

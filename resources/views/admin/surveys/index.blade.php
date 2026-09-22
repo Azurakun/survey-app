@@ -29,7 +29,7 @@
                     :style="activeTab === '{{ $key }}' ? 'background:#1C1917; color:#FFFFFF;' : 'color:#6E675F;'"
                     class="px-4 py-2 rounded-xl text-xs transition-all duration-200">
                 {{ $label }}
-                @php $count = $key === 'ALL' ? $surveys->count() : $surveys->where('status', $key)->count(); @endphp
+                @php $count = $key === 'ALL' ? $surveys->count() : $surveys->filter(fn($s) => $s->effective_status === $key)->count(); @endphp
                 <span :class="activeTab === '{{ $key }}' ? 'bg-white/20 text-white' : 'bg-surface-base text-ink-muted'"
                       class="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full font-bold">{{ $count }}</span>
             </button>
@@ -68,7 +68,7 @@
             @php
                 $periodStatus = $survey->period_status;
             @endphp
-            <div x-show="activeTab === 'ALL' || activeTab === '{{ $survey->status }}'"
+            <div x-show="activeTab === 'ALL' || activeTab === '{{ $survey->effective_status }}'"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100"
@@ -79,9 +79,9 @@
                     <div class="flex-1 min-w-0">
                         <!-- Status Badge -->
                         <div class="flex items-center gap-2 mb-2 flex-wrap">
-                            @if($survey->status === 'PUBLISHED')
+                            @if($survey->effective_status === 'PUBLISHED')
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider" style="background:#EDFAF2; border-color:#A3D9BA; color:#1A5C38;">● Published</span>
-                            @elseif($survey->status === 'DRAFT')
+                            @elseif($survey->effective_status === 'DRAFT')
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider" style="background:#FAF8F5; border-color:#E5E0D8; color:#A19A91;">○ Draft</span>
                             @else
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider" style="background:#FDECEA; border-color:#F5B7B1; color:#922B21;">✕ Closed</span>

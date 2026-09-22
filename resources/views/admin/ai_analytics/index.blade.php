@@ -26,6 +26,37 @@
         </a>
     </div>
 
+    <!-- ── Excel & Document Upload CTA Banner ────────────────────────────── -->
+    <div class="p-6 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all"
+         style="background:linear-gradient(135deg, #1C1917 0%, #2C2723 100%); color:#FFFFFF; border-color:#C89D54;">
+        <div class="space-y-1 max-w-2xl">
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border"
+                      style="background:rgba(245,158,11,0.2); border-color:rgba(245,158,11,0.4); color:#FBBF24;">
+                    🚧 DALAM TAHAP PENGEMBANGAN
+                </span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border"
+                      style="background:rgba(200,157,84,0.2); border-color:rgba(200,157,84,0.4); color:#C89D54;">
+                    ✨ DOKUMEN & EXCEL EXTERNAL
+                </span>
+                <span class="text-xs text-amber-300 font-semibold">• Pertumbuhan Usaha (Growth Likelihood)</span>
+            </div>
+            <h2 class="font-serif font-bold text-lg text-white">Punya File Excel Google Form atau Proposal PPTX/PDF Bisnis?</h2>
+            <p class="text-xs text-stone-300 leading-relaxed">
+                Unggah dokumen bisnis eksternal (.xlsx, .csv, .pdf, .pptx, .docx) untuk menganalisis potensi pertumbuhan usaha awal, kesesuaian pasar riil, daya beli WTP, serta rekomendasi strategi bisnis yang tersimpan di database.
+            </p>
+        </div>
+
+        <a href="{{ route('admin.document-analytics.index') }}"
+           class="px-5 py-3 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 self-start md:self-auto shadow-md"
+           style="background:#C89D54; color:#1C1917;"
+           onmouseover="this.style.background='#D9AB55';"
+           onmouseout="this.style.background='#C89D54';">
+            <span>📁 Buka Analisa Dokumen Bisnis</span>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </a>
+    </div>
+
     <!-- ── Filter & Search Bar ───────────────────────────────────────────── -->
     <div class="card p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
         <form method="GET" action="{{ route('admin.ai-analytics.index') }}" class="w-full flex flex-col sm:flex-row gap-3">

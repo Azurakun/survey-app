@@ -46,7 +46,7 @@ class AiAnalyticsController extends Controller
     }
 
     /**
-     * AJAX endpoint to regenerate AI analysis
+     * AJAX endpoint to generate / regenerate AI analysis and save to DB
      */
     public function generate(Request $request, $id)
     {
@@ -54,15 +54,55 @@ class AiAnalyticsController extends Controller
             $survey = Survey::findOrFail($id);
             $analysis = $this->aiService->generateAnalysis($survey);
 
+            // Persist generated analysis to survey DB record
+            $survey->update([
+                'ai_analysis'    => $analysis,
+                'ai_analyzed_at' => now(),
+            ]);
+
             return response()->json([
                 'success'  => true,
                 'analysis' => $analysis,
+                'message'  => 'Analisa AI berhasil dibuat dan disimpan.',
             ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memproses analisa: ' . $e->getMessage(),
             ], 500);
+        }
+    }
+
+    /**
+     * AJAX / HTTP endpoint to delete saved AI analysis from DB
+     */
+    public function deleteAnalysis(Request $request, $id)
+    {
+        try {
+            $survey = Survey::findOrFail($id);
+            $survey->update([
+                'ai_analysis'    => null,
+                'ai_analyzed_at' => null,
+            ]);
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Hasil analisa AI berhasil dihapus.',
+                ]);
+            }
+
+            return redirect()->route('admin.surveys.analytics', ['id' => $id, 'tab' => 'AI_ANALYTICS'])
+                ->with('success', 'Hasil analisa AI berhasil dihapus.');
+        } catch (\Throwable $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menghapus analisa: ' . $e->getMessage(),
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Gagal menghapus analisa: ' . $e->getMessage());
         }
     }
 }

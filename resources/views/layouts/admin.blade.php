@@ -58,11 +58,14 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
     <style>
+        [x-cloak] { display: none !important; }
         * { box-sizing: border-box; }
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
             background-color: #FAF8F5;
             color: #1C1917;
+            margin: 0;
+            padding: 0;
         }
         .font-serif {
             font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif !important;
@@ -201,8 +204,15 @@
             <a href="{{ route('admin.ai-analytics.index') }}"
                class="nav-item {{ (request()->routeIs('admin.ai-analytics.*') || request()->routeIs('admin.surveys.analytics')) ? 'active' : '' }}">
                 <svg class="w-4 h-4 shrink-0" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                <span>Analisa</span>
+                <span>Analisa AI Survey</span>
                 <span class="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md border" style="background:#FAF6EE; border-color:#E5E0D8; color:#C89D54;">AI</span>
+            </a>
+
+            <a href="{{ route('admin.document-analytics.index') }}"
+               class="nav-item {{ request()->routeIs('admin.document-analytics.*') ? 'active' : '' }}">
+                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>Analisa Dokumen Bisnis</span>
+                <span class="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md border" style="background:#FFFBEB; border-color:#FDE68A; color:#92400E;" title="Fitur Dalam Tahap Pengembangan">DEV</span>
             </a>
         </nav>
 

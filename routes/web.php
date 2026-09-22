@@ -55,6 +55,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Analytics & Respondent Management
     Route::get('/surveys/{id}/analytics', [AnalyticsController::class, 'show'])->name('surveys.analytics');
+    Route::get('/surveys/{id}/print-ai', [AnalyticsController::class, 'printAi'])->name('surveys.print-ai');
     Route::get('/surveys/{id}/export', [AnalyticsController::class, 'export'])->name('surveys.export');
     Route::delete('/respondents/{id}', [AnalyticsController::class, 'destroyRespondent'])->name('respondents.destroy');
 
@@ -62,4 +63,15 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/ai-analytics', [AiAnalyticsController::class, 'index'])->name('ai-analytics.index');
     Route::get('/ai-analytics/{id}', [AiAnalyticsController::class, 'show'])->name('ai-analytics.show');
     Route::post('/ai-analytics/{id}/generate', [AiAnalyticsController::class, 'generate'])->name('ai-analytics.generate');
+    Route::delete('/ai-analytics/{id}/delete', [AiAnalyticsController::class, 'deleteAnalysis'])->name('ai-analytics.delete');
+
+    // Document & Excel Business AI Analytics
+    Route::get('/document-analytics', [\App\Http\Controllers\Admin\DocumentAnalysisController::class, 'index'])->name('document-analytics.index');
+    Route::post('/document-analytics', [\App\Http\Controllers\Admin\DocumentAnalysisController::class, 'store'])->name('document-analytics.store');
+    Route::get('/document-analytics/{id}', [\App\Http\Controllers\Admin\DocumentAnalysisController::class, 'show'])->name('document-analytics.show');
+    Route::post('/document-analytics/{id}/regenerate', [\App\Http\Controllers\Admin\DocumentAnalysisController::class, 'regenerate'])->name('document-analytics.regenerate');
+    Route::post('/document-analytics/{id}/chat', [\App\Http\Controllers\Admin\DocumentAnalysisController::class, 'chat'])->name('document-analytics.chat');
+    Route::post('/document-analytics/{id}/chat/rewind', [\App\Http\Controllers\Admin\DocumentAnalysisController::class, 'rewindChat'])->name('document-analytics.chat.rewind');
+    Route::delete('/document-analytics/{id}/chat', [\App\Http\Controllers\Admin\DocumentAnalysisController::class, 'clearChat'])->name('document-analytics.chat.clear');
+    Route::delete('/document-analytics/{id}', [\App\Http\Controllers\Admin\DocumentAnalysisController::class, 'destroy'])->name('document-analytics.destroy');
 });

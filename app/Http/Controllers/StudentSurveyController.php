@@ -73,7 +73,12 @@ class StudentSurveyController extends Controller
         // Validate required questions
         foreach ($survey->questions as $q) {
             if ($q->wajib_diisi) {
-                $hasText = isset($answersData[$q->id]) && $answersData[$q->id] !== '';
+                $hasText = false;
+                if (isset($answersData[$q->id])) {
+                    $hasText = is_array($answersData[$q->id])
+                        ? count($answersData[$q->id]) > 0
+                        : trim((string) $answersData[$q->id]) !== '';
+                }
                 $hasFile = isset($filesData[$q->id]);
 
                 if (!$hasText && !$hasFile) {

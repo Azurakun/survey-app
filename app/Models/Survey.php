@@ -25,6 +25,8 @@ class Survey extends Model
         'limit_one_response',
         'tanggal_mulai',
         'tanggal_selesai',
+        'ai_analysis',
+        'ai_analyzed_at',
     ];
 
     protected $casts = [
@@ -33,6 +35,8 @@ class Survey extends Model
         'limit_one_response'  => 'boolean',
         'tanggal_mulai'       => 'date',
         'tanggal_selesai'     => 'date',
+        'ai_analysis'         => 'array',
+        'ai_analyzed_at'      => 'datetime',
     ];
 
     /**
@@ -56,6 +60,15 @@ class Survey extends Model
             }
         }
 
+        $nowWib = \Carbon\Carbon::now('Asia/Jakarta');
+        if ($this->tanggal_mulai && $this->tanggal_mulai->timezone('Asia/Jakarta')->startOfDay()->isFuture()) {
+            return false;
+        }
+
+        if ($this->tanggal_selesai && $this->tanggal_selesai->timezone('Asia/Jakarta')->endOfDay()->isPast()) {
+            return false;
+        }
+
         return true;
     }
 
@@ -68,8 +81,18 @@ class Survey extends Model
             return $this->custom_closed_message;
         }
 
-        if (!empty($this->closed_at) && \Carbon\Carbon::now('Asia/Jakarta')->greaterThanOrEqualTo(\Carbon\Carbon::parse($this->closed_at)->timezone('Asia/Jakarta'))) {
+        $nowWib = \Carbon\Carbon::now('Asia/Jakarta');
+
+        if ($this->tanggal_mulai && $this->tanggal_mulai->timezone('Asia/Jakarta')->startOfDay()->isFuture()) {
+            return "Survey ini belum dibuka. Survey akan dimulai pada " . $this->tanggal_mulai->timezone('Asia/Jakarta')->format('d M Y') . ".";
+        }
+
+        if (!empty($this->closed_at) && $nowWib->greaterThanOrEqualTo(\Carbon\Carbon::parse($this->closed_at)->timezone('Asia/Jakarta'))) {
             return "Survey ini telah otomatis ditutup sesuai jadwal pada " . \Carbon\Carbon::parse($this->closed_at)->timezone('Asia/Jakarta')->format('d M Y H:i') . " WIB.";
+        }
+
+        if ($this->tanggal_selesai && $this->tanggal_selesai->timezone('Asia/Jakarta')->endOfDay()->isPast()) {
+            return "Periode pelaksanaan survey ini telah berakhir pada " . $this->tanggal_selesai->timezone('Asia/Jakarta')->format('d M Y') . ".";
         }
 
         return "Survey ini telah ditutup oleh pemilik survey dan tidak lagi menerima tanggapan baru.";
@@ -101,11 +124,31 @@ class Survey extends Model
     }
 
     /**
+     * Determine effective category status (DRAFT, PUBLISHED, or CLOSED)
+     */
+    public function getEffectiveStatusAttribute(): string
+    {
+        if ($this->status === 'DRAFT') {
+            return 'DRAFT';
+        }
+        if ($this->status === 'CLOSED' || (array_key_exists('accepting_responses', $this->attributes) && !$this->accepting_responses)) {
+            return 'CLOSED';
+        }
+        if (!empty($this->closed_at) && \Carbon\Carbon::now('Asia/Jakarta')->greaterThanOrEqualTo(\Carbon\Carbon::parse($this->closed_at)->timezone('Asia/Jakarta'))) {
+            return 'CLOSED';
+        }
+        if ($this->tanggal_selesai && $this->tanggal_selesai->lt(now()->startOfDay())) {
+            return 'CLOSED';
+        }
+        return 'PUBLISHED';
+    }
+
+    /**
      * Determine the active period status badge label.
      */
     public function getPeriodStatusAttribute(): string
     {
-        if ($this->status !== 'PUBLISHED') {
+        if ($this->effective_status !== 'PUBLISHED') {
             return '';
         }
         $today = now()->startOfDay();

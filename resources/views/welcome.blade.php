@@ -85,7 +85,7 @@
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-[#FAF6EE] via-[#FFFFFF] to-transparent opacity-70 pointer-events-none -z-10 rounded-full blur-3xl"></div>
 
     <!-- ── Header Navigation ───────────────────────────────────────────── -->
-    <header class="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-surface-border transition-all">
+    <header class="sticky top-0 z-40 w-full bg-white border-b border-surface-border transition-all">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
             <a href="#" class="flex items-center gap-3 group">
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shadow-xs transition group-hover:scale-105"

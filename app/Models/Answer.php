@@ -39,4 +39,12 @@ class Answer extends Model
     {
         return $this->belongsTo(Question::class);
     }
+
+    /**
+     * Accessor alias for jawaban column
+     */
+    public function getNilaiJawabanAttribute()
+    {
+        return $this->jawaban;
+    }
 }

@@ -353,6 +353,9 @@ class DatabaseSeeder extends Seeder
             Answer::create(['respondent_id' => $resp->id, 'question_id' => $q3_6->id, 'jawaban' => $feedVal]);
         }
 
-        $this->command->info('[OK] DatabaseSeeder selesai: 3 Survey dengan 34, 32, dan 35 Responden.');
+        $this->command->info('[OK] DatabaseSeeder selesai: 3 Survey sample + TEFA TKJ.');
+
+        // ─── TEFA TKJ Survey: 500 Responden ───────────────────────────
+        $this->call(TefaTkjSurveySeeder::class);
     }
 }

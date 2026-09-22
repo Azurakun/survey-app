@@ -498,7 +498,7 @@ function studentWizardApp() {
             });
 
             try {
-                const res = await fetch("{{ route('student.survey.submit', $survey->id) }}", {
+                const res = await fetch("{{ route('student.survey.submit', $survey->id, false) }}", {
                     method: 'POST',
                     headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                     body: formData
