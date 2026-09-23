@@ -183,7 +183,7 @@
                     <div class="lg:col-span-4 p-4 rounded-xl space-y-3 border" style="background:#FFFFFF; border-color:#E5E0D8;">
                         <div>
                             <span class="text-[10px] font-bold uppercase tracking-wider block" style="color:#A19A91;">SWEET SPOT HARGA (WTP)</span>
-                            <span class="font-bold text-base text-ink" x-text="aiAnalysis.strategi_harga_wtp ? aiAnalysis.strategi_harga_wtp.sweet_spot_harga : 'Rp 0'"></span>
+                            <span class="font-bold text-base text-ink" x-text="aiAnalysis.strategi_harga_wtp ? aiAnalysis.strategi_harga_wtp.sweet_spot_harga : '-'"></span>
                         </div>
                         <div class="pt-2 border-t" style="border-color:#F4F0E8;">
                             <span class="text-[10px] font-bold uppercase tracking-wider block" style="color:#A19A91;">TINGKAT MINAT KONSUMEN</span>
@@ -201,15 +201,31 @@
                     <div>
                         <span class="text-[10px] font-bold uppercase tracking-widest block" style="color:#C89D54;">INTELIJEN AI & REKOMENDASI PASAR</span>
                         <h3 class="font-serif font-bold text-base text-ink">Dokumen Analisa AI Belum Dibuat</h3>
-                        <p class="text-xs text-stone-600 mt-0.5">Analisis rekomendasi bisnis & WTP dari {{ $totalRespondents }} responden belum di-generate.</p>
+                        @if($totalRespondents < 5)
+                            <p class="text-xs text-amber-900 font-medium mt-0.5 flex items-center gap-1.5">
+                                <span>⚠️</span>
+                                <span>Jumlah responden belum mencukupi (<strong>{{ $totalRespondents }}/5</strong> responden). Minimal 5 responden diperlukan guna mencegah bias hasil riset.</span>
+                            </p>
+                        @else
+                            <p class="text-xs text-stone-600 mt-0.5">Analisis rekomendasi bisnis & WTP dari {{ $totalRespondents }} responden siap di-generate.</p>
+                        @endif
                     </div>
                 </div>
-                <button type="button" @click="activeView = 'AI_ANALYTICS'; regenerateAi();"
-                        class="px-4 py-2.5 text-xs font-bold rounded-xl text-white transition shadow-xs whitespace-nowrap cursor-pointer flex items-center gap-2"
-                        style="background:#C89D54;">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    ✨ Generate Analisa AI
-                </button>
+                @if($totalRespondents < 5)
+                    <button type="button" @click="activeView = 'AI_ANALYTICS'"
+                            class="px-4 py-2.5 text-xs font-bold rounded-xl transition shadow-xs whitespace-nowrap flex items-center gap-2 border cursor-pointer"
+                            style="background:#FAF8F5; border-color:#E5E0D8; color:#6E675F;">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span>Syarat Minimal Responden ({{ $totalRespondents }}/5)</span>
+                    </button>
+                @else
+                    <button type="button" @click="activeView = 'AI_ANALYTICS'; regenerateAi();"
+                            class="px-4 py-2.5 text-xs font-bold rounded-xl text-white transition shadow-xs whitespace-nowrap cursor-pointer flex items-center gap-2"
+                            style="background:#C89D54;">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        ✨ Generate Analisa AI
+                    </button>
+                @endif
             </div>
         </template>
 
@@ -671,24 +687,73 @@
 
         <!-- EMPTY STATE CARD: BEFORE AI GENERATION -->
         <template x-if="(!aiAnalysis || !aiAnalysis.ringkasan_eksekutif) && !aiLoading">
-            <div class="card p-8 sm:p-12 text-center space-y-5 border" style="background:#FFFFFF; border-color:#E5E0D8;">
-                <div class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-xs" style="background:#FAF6EE; border: 1px solid #E5E0D8; color:#C89D54;">
-                    ✨
-                </div>
-                <div class="max-w-lg mx-auto space-y-2">
-                    <h3 class="font-serif font-bold text-2xl text-ink">Dokumen Analisa AI Belum Dibuat</h3>
-                    <p class="text-xs sm:text-sm text-stone-600 leading-relaxed font-medium">
-                        Data survei dari <span class="font-bold text-stone-900">{{ $totalRespondents }} responden</span> telah terkumpul. Klik tombol di bawah ini untuk memulai analisa AI dalam mengevaluasi sentimen pasar, estimasi harga WTP, serta menyusun rekomendasi strategi kewirausahaan.
-                    </p>
-                </div>
-                <div class="pt-2">
-                    <button type="button" @click="regenerateAi()" :disabled="aiLoading"
-                            class="px-6 py-3 rounded-xl font-bold text-sm text-white shadow-sm transition-all duration-200 inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                            style="background:#C89D54;">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        ✨ Generate Analisa AI Sekarang
-                    </button>
-                </div>
+            <div class="card p-8 sm:p-12 text-center space-y-6 border" style="background:#FFFFFF; border-color:#E5E0D8;">
+                @if($totalRespondents < 5)
+                    <!-- Sample Warning State: Respondents < 5 -->
+                    <div class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-xs" style="background:#FDECEA; border: 1px solid #F5B7B1; color:#922B21;">
+                        ⚠️
+                    </div>
+                    <div class="max-w-lg mx-auto space-y-2">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-300">
+                            Batas Minimal Belum Terpenuhi
+                        </span>
+                        <h3 class="font-serif font-bold text-2xl text-ink">Sampel Responden Belum Mencukupi</h3>
+                        <p class="text-xs sm:text-sm text-stone-600 leading-relaxed font-medium">
+                            Saat ini baru terkumpul <span class="font-bold text-rose-700">{{ $totalRespondents }} responden</span>. Untuk menghasilkan analisis pasar yang objektif, mencegah bias data dari sampel kecil, serta memastikan semua wawasan <em>grounded</em> dari responden nyata, sistem mensyaratkan <strong>minimal 5 responden</strong> (direkomendasikan 10–30 responden).
+                        </p>
+                    </div>
+
+                    <!-- Progress Bar to 5 Respondents -->
+                    <div class="max-w-md mx-auto p-4 rounded-xl border space-y-2" style="background:#FAF8F5; border-color:#E5E0D8;">
+                        <div class="flex items-center justify-between text-xs font-bold text-ink">
+                            <span>Progres Pengumpulan Responden</span>
+                            <span class="text-amber-800">{{ $totalRespondents }} / 5 Responden</span>
+                        </div>
+                        <div class="w-full bg-stone-200 rounded-full h-2.5 overflow-hidden">
+                            <div class="h-2.5 rounded-full transition-all duration-500"
+                                 style="width: {{ min(100, max(10, ($totalRespondents / 5) * 100)) }}%; background: #C89D54;"></div>
+                        </div>
+                        <p class="text-[11px] text-stone-500 text-left">
+                            Kurang <strong>{{ max(0, 5 - $totalRespondents) }} responden</strong> lagi untuk membuka fitur Analisa Intelijen AI.
+                        </p>
+                    </div>
+
+                    <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
+                        <button type="button" disabled
+                                class="px-6 py-3 rounded-xl font-bold text-sm text-stone-400 bg-stone-100 border border-stone-300 shadow-none cursor-not-allowed inline-flex items-center gap-2">
+                            <svg class="w-4 h-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            <span>Analisa AI Terkunci (Minimal 5 Responden)</span>
+                        </button>
+                        <a href="{{ route('student.survey', $survey->kode_akses ?? $survey->id) }}" target="_blank"
+                           class="px-5 py-3 rounded-xl font-bold text-xs text-stone-800 border transition inline-flex items-center gap-1.5"
+                           style="background:#FAF8F5; border-color:#E5E0D8;">
+                            <svg class="w-4 h-4 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            <span>Buka Form Kuesioner Responden ↗</span>
+                        </a>
+                    </div>
+                @else
+                    <!-- Ready State: Respondents >= 5 -->
+                    <div class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-xs" style="background:#FAF6EE; border: 1px solid #E5E0D8; color:#C89D54;">
+                        ✨
+                    </div>
+                    <div class="max-w-lg mx-auto space-y-2">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            Data Memenuhi Syarat Minimal
+                        </span>
+                        <h3 class="font-serif font-bold text-2xl text-ink">Dokumen Analisa AI Siap Dibuat</h3>
+                        <p class="text-xs sm:text-sm text-stone-600 leading-relaxed font-medium">
+                            Data survei dari <span class="font-bold text-stone-900">{{ $totalRespondents }} responden</span> telah terkumpul. Klik tombol di bawah ini untuk memulai analisa AI dalam mengevaluasi sentimen pasar, estimasi harga WTP, serta menyusun rekomendasi strategi kewirausahaan 100% grounded dari hasil survei nyata.
+                        </p>
+                    </div>
+                    <div class="pt-2">
+                        <button type="button" @click="regenerateAi()" :disabled="aiLoading"
+                                class="px-6 py-3 rounded-xl font-bold text-sm text-white shadow-sm transition-all duration-200 inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                                style="background:#C89D54;">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            ✨ Generate Analisa AI Sekarang
+                        </button>
+                    </div>
+                @endif
             </div>
         </template>
 
@@ -709,6 +774,26 @@
         <!-- AI Executive Document Card (POPULATED AFTER GENERATION) -->
         <template x-if="aiAnalysis && aiAnalysis.ringkasan_eksekutif">
             <div class="card p-6 sm:p-8 space-y-6 border" style="background:#FFFFFF; border-color:#E5E0D8;">
+
+                @if($totalRespondents < 5)
+                    <!-- SAMPLE BIAS WARNING BANNER FOR EXISTING RESULTS -->
+                    <div class="p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                         style="background:#FFF5F5; border-color:#FEB2B2;">
+                        <div class="flex items-start gap-3">
+                            <span class="p-2 rounded-xl bg-rose-500/10 text-rose-700 text-xl font-bold shrink-0">⚠️</span>
+                            <div>
+                                <h4 class="font-bold text-sm text-rose-900">Peringatan Validitas: Jumlah Responden Sangat Minim ({{ $totalRespondents }} Responden)</h4>
+                                <p class="text-xs text-rose-700 mt-0.5 leading-relaxed">
+                                    Dokumen ini dihasilkan ketika survei baru memiliki <strong>{{ $totalRespondents }} responden</strong> (&lt; 5 responden). Analisis dari sampel tunggal/sangat kecil sangat rentan bias dan tidak representatif. Disarankan untuk menghapus hasil ini dan menunggu minimal 5 responden terkumpul.
+                                </p>
+                            </div>
+                        </div>
+                        <button type="button" @click="deleteAi()" :disabled="aiLoading"
+                                class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-700 hover:bg-rose-800 transition shrink-0 whitespace-nowrap cursor-pointer shadow-xs">
+                            Hapus Hasil Analisa
+                        </button>
+                    </div>
+                @endif
                 
                 <!-- Document Header -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b" style="border-color:#E5E0D8;">
@@ -732,25 +817,34 @@
                             <span>Cetak / PDF</span>
                         </a>
 
-                        <button type="button" @click="regenerateAi()" :disabled="aiLoading"
-                                class="px-4 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                                style="background:#FAF8F5; border-color:#E5E0D8; color:#1C1917;">
-                            <template x-if="!aiLoading">
-                                <span class="flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                    Generate Ulang AI
-                                </span>
-                            </template>
-                            <template x-if="aiLoading">
-                                <span class="flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Memproses...
-                                </span>
-                            </template>
-                        </button>
+                        @if($totalRespondents < 5)
+                            <button type="button" disabled
+                                    title="Minimal 5 responden diperlukan untuk generate ulang"
+                                    class="px-4 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-2 cursor-not-allowed opacity-50 bg-stone-100 text-stone-400 border-stone-300">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                <span>Perlu Min. 5 Responden</span>
+                            </button>
+                        @else
+                            <button type="button" @click="regenerateAi()" :disabled="aiLoading"
+                                    class="px-4 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                                    style="background:#FAF8F5; border-color:#E5E0D8; color:#1C1917;">
+                                <template x-if="!aiLoading">
+                                    <span class="flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                        Generate Ulang AI
+                                    </span>
+                                </template>
+                                <template x-if="aiLoading">
+                                    <span class="flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Memproses...
+                                    </span>
+                                </template>
+                            </button>
+                        @endif
 
                         <button type="button" @click="deleteAi()" :disabled="aiLoading"
                                 class="px-3.5 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
@@ -815,12 +909,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                     <div class="md:col-span-5 p-5 rounded-2xl border flex flex-col justify-center space-y-2" style="background:#EDFAF2; border-color:#A3D9BA;">
                         <span class="text-[10px] font-bold uppercase tracking-widest" style="color:#1A5C38;">SWEET SPOT HARGA JUAL</span>
-                        <div class="text-3xl font-serif font-bold text-emerald-900" x-text="aiAnalysis.strategi_harga_wtp ? aiAnalysis.strategi_harga_wtp.sweet_spot_harga : 'Rp 25.000'"></div>
+                        <div class="text-3xl font-serif font-bold text-emerald-900" x-text="aiAnalysis.strategi_harga_wtp ? aiAnalysis.strategi_harga_wtp.sweet_spot_harga : '-'"></div>
                         <span class="text-[11px] font-medium text-emerald-700">Rekomendasi harga optimal berpatokan pada sebaran WTP responden</span>
                     </div>
                     <div class="md:col-span-7 p-5 rounded-2xl border space-y-2" style="background:#FAF8F5; border-color:#E5E0D8;">
                         <span class="text-[10px] font-bold uppercase tracking-widest block" style="color:#A19A91;">REKOMENDASI MARGIN & HPP</span>
-                        <p class="text-xs sm:text-sm text-stone-700 font-medium leading-relaxed text-justify whitespace-pre-line" x-text="aiAnalysis.strategi_harga_wtp ? aiAnalysis.strategi_harga_wtp.rekomendasi_margin : 'Rekomendasi margin kotor 30-35%...'"></p>
+                        <p class="text-xs sm:text-sm text-stone-700 font-medium leading-relaxed text-justify whitespace-pre-line" x-text="aiAnalysis.strategi_harga_wtp ? aiAnalysis.strategi_harga_wtp.rekomendasi_margin : 'Data margin dan daya beli tidak diuji secara numerik dalam survei ini.'"></p>
                     </div>
                 </div>
             </div>
@@ -1377,6 +1471,11 @@ function analyticsApp() {
             const surveyId   = '{{ $survey->id }}';
             const surveyJudul = '{{ addslashes($survey->judul) }}';
             const respondents = {{ $totalRespondents }};
+
+            if (respondents < 5) {
+                alert(`⚠️ Peringatan Validitas Riset:\n\nJumlah responden saat ini baru ${respondents} responden (minimal 5 responden).\nKumpulkan setidaknya 5 responden sebelum melakukan analisa AI agar hasil analisis objektif, grounded, dan terhindar dari bias data.`);
+                return;
+            }
 
             console.group('%c[AI CONSULTANT] Business Intelligence Analysis', 'color:#C89D54; font-weight:bold; font-size:13px;');
             console.log('%c═══════════════════════════════════════════════════', 'color:#C89D54;');

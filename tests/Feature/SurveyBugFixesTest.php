@@ -249,4 +249,59 @@ class SurveyBugFixesTest extends TestCase
         $this->assertEquals(20000, $stats['avg']);
         $this->assertEquals(20000, $stats['median']);
     }
+
+    /**
+     * Test 7: AI generation endpoint blocks execution when respondents < 5.
+     */
+    public function test_ai_generation_blocked_when_respondents_below_minimum(): void
+    {
+        $survey = Survey::create([
+            'user_id' => $this->user->id,
+            'judul'   => 'Riset Produk Rasa Baru',
+            'status'  => 'PUBLISHED',
+        ]);
+
+        // Only 1 respondent
+        Respondent::create([
+            'survey_id' => $survey->id,
+            'nisn'      => 'NISN_SINGLE',
+        ]);
+
+        $this->actingAs($this->user);
+        $response = $this->postJson(route('admin.ai-analytics.generate', $survey->id));
+
+        $response->assertStatus(422);
+        $response->assertJson([
+            'success' => false,
+        ]);
+        $this->assertStringContainsString('minimal 5 responden', $response->json('message'));
+    }
+
+    /**
+     * Test 8: GeminiAiService throws InvalidArgumentException if respondents < 5.
+     */
+    public function test_gemini_service_throws_exception_on_insufficient_respondents(): void
+    {
+        $survey = Survey::create([
+            'user_id' => $this->user->id,
+            'judul'   => 'Riset Uji Sampel Minim',
+            'status'  => 'PUBLISHED',
+        ]);
+
+        Respondent::create([
+            'survey_id' => $survey->id,
+            'nisn'      => 'NISN_SAMPLE_1',
+        ]);
+        Respondent::create([
+            'survey_id' => $survey->id,
+            'nisn'      => 'NISN_SAMPLE_2',
+        ]);
+
+        $service = app(\App\Services\GeminiAiService::class);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('minimal 5 responden');
+
+        $service->generateAnalysis($survey);
+    }
 }

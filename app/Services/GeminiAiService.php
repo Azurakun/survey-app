@@ -22,34 +22,19 @@ class GeminiAiService
         Log::info('[AI CONSULTANT] Timestamp   : ' . now()->format('Y-m-d H:i:s'));
         Log::info('[AI CONSULTANT] ═══════════════════════════════════════════════════');
         
-        // ─── STRICT SURVEY DATA ISOLATION ────────────────────────────────────
+        // ─── STRICT SURVEY DATA ISOLATION & SAMPLE SIZE VALIDATION ──────────
         $survey->load(['questions.answers', 'respondents']);
         $totalRespondents = $survey->respondents->count();
         Log::info('[AI CONSULTANT] [STEP 1/6] ✅ Loaded: ' . $totalRespondents . ' respondents, ' . $survey->questions->count() . ' questions.');
 
-        if ($totalRespondents === 0) {
-            return [
-                'has_enough_data' => false,
-                'source' => 'Sistem Validasi Data Intelijen Pasar',
-                'ringkasan_eksekutif' => 'Data responden untuk survei ini belum terkumpul. Disarankan mengumpulkan minimal 10–30 responden agar hasil analisis minat pasar, estimasi WTP (daya beli), dan rekomendasi produk memiliki tingkat akurasi presisi.',
-                'skor_potensi' => 0,
-                'analisis_sentimen' => [
-                    'tingkat_minat' => 'Belum Ada Data Responden',
-                    'persentase_positif' => 0,
-                    'penjelasan' => 'Survei ini belum memiliki responden. Bagikan tautan survei untuk mengumpulkan data responden.'
-                ],
-                'strategi_harga_wtp' => [
-                    'sweet_spot_harga' => 'Belum Ada Data WTP',
-                    'rekomendasi_margin' => 'Kumpulkan data responden untuk menghitung estimasi daya beli konsumen.'
-                ],
-                'rekomendasi_produk' => [],
-                'strategi_pemasaran' => [],
-                'action_plan' => [
-                    'Langkah 1: Bagikan tautan survei ke target calon konsumen',
-                    'Langkah 2: Kumpulkan masukan responden',
-                    'Langkah 3: Buka kembali halaman Analisa AI'
-                ]
-            ];
+        // Enforce minimum respondent threshold to prevent severe sampling bias and artificial speculation
+        if ($totalRespondents < 5) {
+            Log::warning('[AI CONSULTANT] ⚠️ Blocked: Sample size (' . $totalRespondents . ') is below the minimum threshold (5).');
+            throw new \InvalidArgumentException(
+                "Jumlah responden belum memenuhi syarat minimal analisis pasar (saat ini {$totalRespondents} responden, minimal 5 responden). " .
+                "Untuk menjaga validitas data riset pasar, mencegah bias dari sampel yang terlalu kecil, dan memastikan semua rekomendasi " .
+                "grounded dari hasil survei nyata, kumpulkan setidaknya 5 responden (direkomendasikan 10–30 responden) sebelum menjalankan Analisa AI."
+            );
         }
 
         // ─── COLLECT ALL DETAILED RAW DATA FROM THIS SPECIFIC SURVEY ONLY ─────
@@ -170,18 +155,21 @@ class GeminiAiService
             $questionsData[] = $qInfo;
         }
 
-        // Metrics calculations strictly for this survey
-        $avgLikert    = count($likertScores) > 0 ? round(array_sum($likertScores) / count($likertScores), 2) : 4.2;
-        $avgWtp       = count($wtpPrices) > 0 ? round(array_sum($wtpPrices) / count($wtpPrices)) : 25000;
-        $minWtp       = count($wtpPrices) > 0 ? min($wtpPrices) : 15000;
-        $maxWtp       = count($wtpPrices) > 0 ? max($wtpPrices) : 45000;
-        $medianWtp    = count($wtpPrices) > 0 ? $this->calculateMedian($wtpPrices) : 25000;
-        $sweetSpotWtp = $this->roundToNearest5000($avgWtp);
+        // Metrics calculations strictly grounded in actual survey responses (NO FAKE DEFAULTS)
+        $hasLikert    = count($likertScores) > 0;
+        $avgLikert    = $hasLikert ? round(array_sum($likertScores) / count($likertScores), 2) : null;
+
+        $hasWtp       = count($wtpPrices) > 0;
+        $avgWtp       = $hasWtp ? round(array_sum($wtpPrices) / count($wtpPrices)) : null;
+        $minWtp       = $hasWtp ? min($wtpPrices) : null;
+        $maxWtp       = $hasWtp ? max($wtpPrices) : null;
+        $medianWtp    = $hasWtp ? $this->calculateMedian($wtpPrices) : null;
+        $sweetSpotWtp = $avgWtp !== null ? $this->roundToNearest5000($avgWtp) : null;
 
         Log::info('[AI CONSULTANT] [STEP 2/6] ✅ Data collection complete.');
-        Log::info('[AI CONSULTANT]   Avg Likert  : ' . $avgLikert . '/5.0');
+        Log::info('[AI CONSULTANT]   Avg Likert  : ' . ($avgLikert !== null ? $avgLikert . '/5.0' : 'N/A (Tidak ada pertanyaan Likert)'));
         Log::info('[AI CONSULTANT]   WTP Services: ' . count($numberQuestionsWtp) . ' questions');
-        Log::info('[AI CONSULTANT]   Sweet Spot  : Rp ' . number_format($sweetSpotWtp, 0, ',', '.'));
+        Log::info('[AI CONSULTANT]   Sweet Spot  : ' . ($sweetSpotWtp !== null ? 'Rp ' . number_format($sweetSpotWtp, 0, ',', '.') : 'N/A (Tidak ada pertanyaan WTP numerik)'));
 
         $apiKey = config('services.gemini.key', env('GEMINI_API_KEY'));
         $prompt = $this->buildPrompt($survey, $totalRespondents, $questionsData, $numberQuestionsWtp, $avgLikert, $avgWtp, $minWtp, $maxWtp, $medianWtp, $sweetSpotWtp, $textFeedback);
@@ -216,28 +204,56 @@ class GeminiAiService
         return $n % 2 === 0 ? ($nums[$mid] + $nums[$mid + 1]) / 2 : $nums[$mid];
     }
 
-    private function buildPrompt(Survey $survey, int $respondents, array $questionsData, array $numberQuestionsWtp, float $avgLikert, float $avgWtp, float $minWtp, float $maxWtp, float $medianWtp, int $sweetSpotWtp, array $textFeedback): string
-    {
-        $qJson        = json_encode($questionsData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        $wtpJson      = json_encode($numberQuestionsWtp, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        $sampleText   = empty($textFeedback) ? '(Tidak ada jawaban teks)' : implode("\n- ", array_slice($textFeedback, 0, 20));
-        $sweetSpotFmt = 'Rp ' . number_format($sweetSpotWtp, 0, ',', '.');
+    private function buildPrompt(
+        Survey $survey,
+        int $respondents,
+        array $questionsData,
+        array $numberQuestionsWtp,
+        ?float $avgLikert,
+        ?float $avgWtp,
+        ?float $minWtp,
+        ?float $maxWtp,
+        ?float $medianWtp,
+        ?int $sweetSpotWtp,
+        array $textFeedback
+    ): string {
+        $qJson      = json_encode($questionsData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $sampleText = empty($textFeedback) ? '(Tidak ada jawaban teks)' : implode("\n- ", array_slice($textFeedback, 0, 20));
+
+        if ($avgLikert !== null) {
+            $likertSection = "**Skor Kepuasan Likert Rata-Rata**: {$avgLikert} / 5.0 (dihitung dari pertanyaan skala Likert aktual)";
+        } else {
+            $likertSection = "**Skor Kepuasan Likert**: TIDAK ADA pertanyaan skala Likert pada survei ini. DILARANG KERAS MENGARANG ATAU MENYEBUTKAN SKOR LIKERT (misal 4.2/5.0 atau angka skala 1-5 lainnya) pada narasi ringkasan ataupun bagian mana pun!";
+        }
+
+        if (!empty($numberQuestionsWtp) && $sweetSpotWtp !== null) {
+            $wtpJson = json_encode($numberQuestionsWtp, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            $wtpSection = "**RINCIAN TARIF HARGA WTP NUMERIK (PERTANYAAN NUMBER):**\n{$wtpJson}\n**Sweet Spot Estimasi Rata-rata**: Rp " . number_format($sweetSpotWtp, 0, ',', '.');
+            $sweetSpotExample = 'Rp ' . number_format($sweetSpotWtp, 0, ',', '.');
+            $marginExample = 'Rincian spesifik sweet spot tarif per layanan berdasarkan data WTP responden numerik aktual...';
+        } else {
+            $wtpSection = "**RINCIAN TARIF HARGA WTP NUMERIK:** TIDAK ADA pertanyaan numerik terbuka untuk tarif harga (WTP). Jika ada pertanyaan pilihan ganda terkait preferensi harga/daya beli di dalam daftar pertanyaan, gunakan murni pilihan yang dipilih responden. Jika sama sekali tidak ada pertanyaan harga, tetapkan 'sweet_spot_harga' menjadi 'Tidak Diukur dalam Survei' dan jelaskan di 'rekomendasi_margin' bahwa survei ini tidak memuat instrumen pengujian harga.";
+            $sweetSpotExample = 'Tidak Diukur dalam Survei';
+            $marginExample = 'Survei ini berfokus pada preferensi varian/kebutuhan produk dan tidak memuat pertanyaan penetapan harga atau WTP numerik secara spesifik. Disarankan melakukan survei pengujian harga terpisah.';
+        }
 
         return <<<PROMPT
 # PERAN & IDENTITAS ANDA
 Anda adalah **Dr. Arjuna Pratama**, Senior Business Intelligence Consultant & Market Research Expert.
 
-TUGAS UTAMA: Susun Dokumen Analisis Pasar dan Rekomendasi Strategis yang **100% GROUNDED (BERDASARKAN) DATA SURVEI AKTUAL** di bawah ini.
+TUGAS UTAMA: Susun Dokumen Analisis Pasar dan Rekomendasi Strategis yang **100% GROUNDED (BERDASARKAN) HANYA PADA DATA SURVEI AKTUAL** di bawah ini.
+
+DILARANG KERAS MENGARANG, MEMBUAT-BUAT RESPON, ATAU MEMBERIKAN ASUMSI BIAS YANG TIDAK BERDASARKAN HASIL SURVEI.
+Semua temuan, persentase, dan rekomendasi Anda harus mencerminkan jawaban responden yang sesungguhnya secara objektif dan jujur.
 
 ---
 # DATA SURVEI UNTUK DIANALISIS
 **Judul Proyek**: "{$survey->judul}"
 **Deskripsi/Tujuan Riset**: "{$survey->deskripsi}"
 **Total Responden Terverifikasi**: {$respondents} orang
-**Skor Kepuasan Likert Rata-Rata**: {$avgLikert} / 5.0
+{$likertSection}
 
-**RINCIAN TARIF HARGA WTP PER PERTANYAAN/LAYANAN:**
-{$wtpJson}
+{$wtpSection}
 
 **DISTRIBUSI DETIL JAWABAN PER PERTANYAAN (RAW DATA):**
 {$qJson}
@@ -246,49 +262,39 @@ TUGAS UTAMA: Susun Dokumen Analisis Pasar dan Rekomendasi Strategis yang **100% 
 - {$sampleText}
 
 ---
-# ATURAN WAJIB PENULISAN & FORMAT PENGUTIPAN (STRICT GROUNDING RULES)
-1. **FORMAT WAJIB PENGUTIPAN PERTANYAAN**:
-   Saat merujuk/mereferensikan pertanyaan survei pada bagian `rekomendasi_produk`, `strategi_pemasaran`, `analisis_sentimen`, dan `action_plan`, Anda **HARUS MENGIKUTI FORMAT EKSPLISIT BERIKUT**:
+# ATURAN WAJIB (STRICT GROUNDING & ANTI-BIAS / ANTI-HALUSINASI)
+1. **STRICT GROUNDING TANPA ASUMSI / FANTASI**:
+   - DILARANG mengarang pertanyaan, opsi jawaban, skor kepuasan, atau nominal harga yang tidak tertera pada data di atas.
+   - Jika survei tidak memiliki pertanyaan berskala Likert, JANGAN PERNAH membuat-buat skor kepuasan (misalnya mengklaim skor Likert 4.2/5.0).
+   - Jika survei tidak memiliki pertanyaan WTP numerik, JANGAN mengarang sweet spot harga nominal fiktif. Tuliskan "Tidak Diukur dalam Survei" atau kutip opsi harga pilihan ganda jika ada.
+   - Dilarang memberikan pujian atau kesimpulan "Sangat Positif" secara bias jika distribusi jawaban responden tidak mendukungnya. Gambarkan apa adanya sesuai data.
+2. **FORMAT WAJIB PENGUTIPAN PERTANYAAN**:
+   Saat merujuk pertanyaan survei pada bagian `rekomendasi_produk`, `strategi_pemasaran`, `analisis_sentimen`, dan `action_plan`, Anda **HARUS MENGIKUTI FORMAT EKSPLISIT BERIKUT**:
    `Berdasarkan Pertanyaan "[Teks Lengkap Pertanyaan]" (Pertanyaan [Nomor])`
 
    CONTOH FORMAT BENAR:
    - `Berdasarkan Pertanyaan "Layanan apa yang paling Anda butuhkan?" (Pertanyaan 9), opsi 'Servis & reparasi laptop/PC' mendominasi dengan 85% pemilih...`
-   - `Berdasarkan Pertanyaan "Program promosi apa yang paling menarik minat Anda?" (Pertanyaan 27), tawaran 'Diskon 20% untuk pelajar/mahasiswa' menjadi opsi teratas...`
-   - `Berdasarkan Pertanyaan "Dari mana Anda biasanya mendapatkan informasi tentang toko servis komputer?" (Pertanyaan 26), saluran 'Instagram / TikTok' dipilih oleh 68% responden...`
+   - `Berdasarkan Pertanyaan "Varian rasa apa yang paling kamu sukai?" (Pertanyaan 2), opsi 'Rasa Mangga Original' dipilih oleh 70% responden...`
 
-   DILARANG HANYA MENULISKAN "Berdasarkan Pertanyaan 26" TANPA MENULISKAN TEKS LENGKAP PERTANYAANNYA DI DALAM TANDA PETIK!
-
-2. **ATURAN KHUSUS REKOMENDASI MARGIN & HARGA WTP (`rekomendasi_margin`)**:
-   - DILARANG MENGUTIP KESELURUHAN KALIMAT PERTANYAAN SURVEI PANJANG (seperti "Berapa tarif jasa yang bersedia Anda bayar..."). Cukup tuliskan NAMA/TOPIK JASA ATAU PRODUKNYA saja!
-   - DILARANG MENULISKAN KALIMAT KUALITATIF AMBIGU (seperti "ditetapkan pada tingkat kompetitif bagi pelajar", "disesuaikan dengan estimasi WTP").
-   - WAJIB MENULISKAN ANGKA NOMINAL HARGA SECARA EKSPLISIT DALAM FORMAT RUPIAH (`Rp low – Rp high` atau `Sweet spot: Rp nominal`) per poin bullet (`•`)!
-
-   FORMAT EKSPLISIT WAJIB UNTUK SETIAP POIN BULLET (`•`):
-   `• Rekomendasi tarif untuk [Nama Ringkas Jasa/Produk] (Pertanyaan [Nomor]) berdasarkan responden adalah sekitar Rp [NominalLow] – Rp [NominalHigh] (Sweet spot: Rp [NominalSweetSpot]).`
-
-   CONTOH FORMAT BENAR PERSIS:
-   "Berdasarkan evaluasi Willingness to Pay (WTP) dari 500 responden terverifikasi, berikut rincian sweet spot tarif per layanan:
-   • Rekomendasi tarif untuk Install Ulang OS Windows (Pertanyaan 11) berdasarkan responden adalah sekitar Rp 35.000 – Rp 75.000 (Sweet spot: Rp 50.000).
-   • Rekomendasi tarif untuk Pembersihan Total (Clean Dust + Thermal Paste) (Pertanyaan 12) berdasarkan responden adalah sekitar Rp 30.000 – Rp 50.000 (Sweet spot: Rp 40.000).
-   • Rekomendasi tarif untuk Upgrade SSD/RAM (Jasa Pasang) (Pertanyaan 13) berdasarkan responden adalah sekitar Rp 25.000 – Rp 45.000 (Sweet spot: Rp 35.000).
-
-   Disarankan menetapkan HPP maksimal 65-70% dari masing-masing sweet spot untuk mengamankan margin keuntungan kotor 30-35% yang sehat."
-3. **GROUNDED ACTION PLAN**:
-   - Setiap tahap action plan wajib mereferensikan nominal harga manis aktual, opsi produk terpopuler, dan saluran promosi teratas dari survei ini.
+   DILARANG HANYA MENULISKAN "Berdasarkan Pertanyaan 2" TANPA MENULISKAN TEKS LENGKAP PERTANYAANNYA DI DALAM TANDA PETIK!
+3. **ATURAN KHUSUS REKOMENDASI MARGIN & HARGA WTP (`rekomendasi_margin`)**:
+   - Jika ada data WTP numerik, tuliskan angka nominal harga secara eksplisit per poin bullet (`•`):
+     `• Rekomendasi tarif untuk [Nama Ringkas Jasa/Produk] (Pertanyaan [Nomor]) berdasarkan responden adalah sekitar Rp [NominalLow] – Rp [NominalHigh] (Sweet spot: Rp [NominalSweetSpot]).`
+   - Jika TIDAK ADA data WTP numerik, jelaskan secara transparan bahwa data penetapan harga tidak diuji dalam instrumen survei ini, dan rekomendasikan survei penetapan harga terpisah.
 
 ---
 Output HARUS dalam format JSON valid persis berikut (TANPA markdown backtick):
 {
-  "ringkasan_eksekutif": "Narasi eksekutif 5-7 kalimat mengutip statistik responden, skor Likert {$avgLikert}/5.0, serta kesimpulan kelayakan produk '{$survey->judul}' berbasis data...",
-  "skor_potensi": 88,
+  "ringkasan_eksekutif": "Narasi eksekutif 4-6 kalimat merangkum evaluasi objektif dari {$respondents} responden pada survei '{$survey->judul}', menyajikan preferensi dominan responden secara jujur tanpa mengarang data yang tidak ada...",
+  "skor_potensi": 75,
   "analisis_sentimen": {
-    "tingkat_minat": "Tinggi (Sangat Positif)",
-    "persentase_positif": 87,
-    "penjelasan": "Analisis pendorong sentimen secara spesifik menyebutkan opsi terbanyak yang dipilih responden..."
+    "tingkat_minat": "Tinggi (Positif) / Sedang (Moderat) / Perlu Evaluasi",
+    "persentase_positif": 75,
+    "penjelasan": "Analisis pendorong sentimen secara spesifik menyebutkan opsi terbanyak yang dipilih responden dari pertanyaan aktual..."
   },
   "strategi_harga_wtp": {
-    "sweet_spot_harga": "{$sweetSpotFmt}",
-    "rekomendasi_margin": "Rincian spesifik sweet spot tarif per layanan berdasarkan data WTP responden..."
+    "sweet_spot_harga": "{$sweetSpotExample}",
+    "rekomendasi_margin": "{$marginExample}"
   },
   "rekomendasi_produk": [
     "Rekomendasi 1 (wajib gunakan format Berdasarkan Pertanyaan \"[Teks]\" (Pertanyaan N))...",
@@ -305,11 +311,11 @@ Output HARUS dalam format JSON valid persis berikut (TANPA markdown backtick):
     "Strategi 5..."
   ],
   "action_plan": [
-    "Tahap 1 (Minggu 1-2): Penetapan HPP berdasarkan sweet spot WTP...",
-    "Tahap 2 (Minggu 3-4): Stok produk/layanan terfavorit...",
-    "Tahap 3 (Bulan 2): Promosi pada saluran media teratas...",
-    "Tahap 4 (Bulan 2-3): Eksekusi operasional & standar garansi...",
-    "Tahap 5 (Bulan 3+): Evaluasi ulasan & program rujukan..."
+    "Tahap 1 (Minggu 1-2): Tindak lanjut prioritas produk terpilih...",
+    "Tahap 2 (Minggu 3-4): Persiapan bahan dan uji coba formulasi produk...",
+    "Tahap 3 (Bulan 2): Promosi pada saluran media sesuai preferensi responden...",
+    "Tahap 4 (Bulan 2-3): Eksekusi operasional dan evaluasi berkala...",
+    "Tahap 5 (Bulan 3+): Peningkatan mutu berdasarkan masukan responden..."
   ]
 }
 PROMPT;
@@ -329,9 +335,9 @@ PROMPT;
     private function callGeminiApi(string $prompt, string $apiKey, float $startTime): ?array
     {
         $models = [
+            'gemini-3.5-flash-lite',
             'gemini-2.5-flash',
-            'gemini-2.0-flash',
-            'gemini-1.5-flash',
+            'gemini-3.5-flash',
             'gemini-flash-latest',
         ];
 
@@ -340,7 +346,9 @@ PROMPT;
             try {
                 $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
 
-                $response = Http::timeout(30)->post($url, [
+                $response = Http::withOptions([
+                    'curl' => [CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4]
+                ])->timeout(60)->post($url, [
                     'contents' => [
                         [
                             'parts' => [
@@ -379,7 +387,7 @@ PROMPT;
                         }
                     }
                 } else {
-                    Log::warning('[AI CONSULTANT]   → ' . $model . ' HTTP error: ' . $response->status());
+                    Log::warning('[AI CONSULTANT]   → ' . $model . ' HTTP error: ' . $response->status() . ' - ' . substr($response->body(), 0, 150));
                 }
             } catch (\Throwable $e) {
                 Log::warning('[AI CONSULTANT]   → ' . $model . ' Exception: ' . $e->getMessage());
@@ -879,13 +887,17 @@ PROMPT;
         }
 
         $chatModels = [
+            'gemini-3.5-flash-lite',
             'gemini-2.5-flash',
+            'gemini-3.5-flash',
             'gemini-flash-latest',
         ];
 
         foreach ($chatModels as $model) {
             try {
-                $response = \Illuminate\Support\Facades\Http::timeout(30)->withHeaders([
+                $response = \Illuminate\Support\Facades\Http::withOptions([
+                    'curl' => [CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4]
+                ])->timeout(45)->withHeaders([
                     'Content-Type' => 'application/json',
                 ])->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
                     'contents' => [

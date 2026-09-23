@@ -70,8 +70,30 @@ class StudentSurveyController extends Controller
         $answersData = $request->input('answers', []);
         $filesData   = $request->file('answers', []);
 
-        // Validate required questions
+        // Validate required questions and files
         foreach ($survey->questions as $q) {
+            if (in_array($q->tipe_pertanyaan, ['IMAGE_UPLOAD', 'FILE_UPLOAD']) && $request->hasFile("answers.{$q->id}")) {
+                $maxSize = $q->tipe_pertanyaan === 'IMAGE_UPLOAD' ? 5120 : 10240; // KB
+                $rules   = $q->tipe_pertanyaan === 'IMAGE_UPLOAD'
+                    ? "file|image|mimes:jpeg,jpg,png,webp,gif,svg|max:{$maxSize}"
+                    : "file|max:{$maxSize}";
+
+                $validator = validator(
+                    ['file' => $request->file("answers.{$q->id}")],
+                    ['file' => $rules],
+                    [
+                        'file.image' => "File untuk pertanyaan \"{$q->teks_pertanyaan}\" harus berupa gambar (JPG, PNG, WEBP).",
+                        'file.max'   => "Ukuran file untuk pertanyaan \"{$q->teks_pertanyaan}\" tidak boleh melebihi " . ($maxSize / 1024) . "MB.",
+                    ]
+                );
+
+                if ($validator->fails()) {
+                    return response()->json([
+                        'error' => $validator->errors()->first('file'),
+                    ], 422);
+                }
+            }
+
             if ($q->wajib_diisi) {
                 $hasText = false;
                 if (isset($answersData[$q->id])) {

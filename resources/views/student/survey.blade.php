@@ -59,10 +59,46 @@
                 <div class="font-serif text-sm font-bold text-stone-900 leading-tight">Riset Pasar Kewirausahaan</div>
             </div>
         </div>
-        <div class="text-xs font-semibold px-3 py-1.5 rounded-full border border-stone-200 bg-stone-50 text-stone-700">
-            <span>Responden Siswa</span>
+        <div class="flex items-center gap-2.5">
+            <!-- Google Form style Autosave Indicator -->
+            <template x-if="!isClosed && !isAlreadySubmitted && !isSubmitted && (step > 0 || (nisn && nisn.trim().length > 0))">
+                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] transition-all duration-200 border"
+                     :class="saveStatus === 'saving' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-stone-50 text-stone-600 border-stone-200'">
+                    <template x-if="saveStatus === 'saving'">
+                        <span class="flex items-center gap-1.5 font-medium">
+                            <span class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span>Menyimpan draf...</span>
+                        </span>
+                    </template>
+                    <template x-if="saveStatus === 'saved'">
+                        <span class="flex items-center gap-1.5 font-medium text-stone-600" title="Draf otomatis tersimpan di perangkat ini">
+                            <span class="text-emerald-600 text-xs font-bold">☁️✓</span>
+                            <span>Draf tersimpan</span>
+                            <span class="text-[10px] text-stone-400 font-mono" x-show="lastSavedTime" x-text="lastSavedTime"></span>
+                        </span>
+                    </template>
+                </div>
+            </template>
+            <div class="text-xs font-semibold px-3 py-1.5 rounded-full border border-stone-200 bg-stone-50 text-stone-700 hidden sm:inline-block">
+                <span>Responden Siswa</span>
+            </div>
         </div>
     </header>
+
+    <!-- ── Restored Draft Notification Banner ──────────────────────────── -->
+    <template x-if="restoredFromDraft && !isClosed && !isAlreadySubmitted && !isSubmitted">
+        <div class="p-4 rounded-2xl border text-xs bg-amber-50/90 border-amber-200 text-amber-900 flex items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-center gap-2.5">
+                <span class="text-base shrink-0">📋</span>
+                <div>
+                    <span class="font-bold">Draf Ditemukan:</span> Progres jawaban Anda sebelumnya telah dipulihkan secara otomatis.
+                </div>
+            </div>
+            <button type="button" @click="resetDraftConfirm()" class="px-3 py-1.5 rounded-lg bg-white border border-amber-300 hover:bg-amber-100 text-amber-900 text-[11px] font-bold transition shrink-0 cursor-pointer shadow-2xs">
+                Kosongkan & Mulai Ulang
+            </button>
+        </div>
+    </template>
 
     <!-- ── Error Message Banner ────────────────────────────────────────── -->
     <template x-if="errorMessage">
@@ -161,6 +197,7 @@
                         </label>
                         <input type="text" x-model="nisn" inputmode="numeric" maxlength="20"
                                placeholder="Contoh: 0012345678"
+                               @input="triggerAutosave()"
                                @keyup.enter="startSurvey()"
                                class="w-full px-5 py-4 rounded-xl text-lg font-bold tracking-wider text-center border border-stone-300 bg-stone-50 text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition">
                     </div>
@@ -222,7 +259,7 @@
                                         <label class="p-4 rounded-xl border border-stone-200 bg-stone-50/50 hover:bg-stone-50 hover:border-stone-400 flex items-center gap-3 cursor-pointer transition"
                                                :class="answers[q.id] === opt ? 'border-amber-500 bg-amber-50/60 ring-2 ring-amber-500/20' : ''">
                                             <input type="radio" :name="'q_' + q.id" :value="opt"
-                                                   x-model="answers[q.id]" class="w-4 h-4 text-amber-600 focus:ring-amber-500">
+                                                   x-model="answers[q.id]" @change="triggerAutosave()" class="w-4 h-4 text-amber-600 focus:ring-amber-500">
                                             <span class="text-xs font-semibold text-stone-800" x-text="opt"></span>
                                         </label>
                                     </template>
@@ -250,8 +287,8 @@
                                 <div class="space-y-4 pt-2">
                                     <div class="grid grid-cols-5 gap-2 sm:gap-3">
                                         <template x-for="val in [1, 2, 3, 4, 5]" :key="val">
-                                            <button type="button" @click="answers[q.id] = val"
-                                                    class="py-4 rounded-2xl border text-center transition font-bold text-sm sm:text-base"
+                                            <button type="button" @click="answers[q.id] = val; triggerAutosave()"
+                                                    class="py-4 rounded-2xl border text-center transition font-bold text-sm sm:text-base cursor-pointer"
                                                     :class="answers[q.id] == val ? 'bg-amber-500 border-amber-600 text-white shadow-xs scale-105' : 'bg-stone-50 border-stone-200 text-stone-800 hover:bg-stone-100'">
                                                 <div x-text="val"></div>
                                                 <div class="text-[9px] font-normal uppercase opacity-75 mt-0.5"
@@ -271,7 +308,7 @@
                                 <div class="space-y-3 pt-2">
                                     <div class="relative">
                                         <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-sm text-stone-400">Rp</span>
-                                        <input type="number" x-model="answers[q.id]" placeholder="Contoh: 25000"
+                                        <input type="number" x-model="answers[q.id]" @input="triggerAutosave()" placeholder="Contoh: 25000"
                                                class="w-full pl-12 pr-4 py-4 rounded-xl text-base font-bold border border-stone-300 bg-stone-50 text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
                                     </div>
                                     <p class="text-[11px] text-stone-500">Masukkan nominal angka harga dalam Rupiah.</p>
@@ -281,7 +318,7 @@
                             <!-- INPUT TYPE 5: SHORT TEXT -->
                             <template x-if="q.tipe_pertanyaan === 'SHORT_TEXT'">
                                 <div class="space-y-3 pt-2">
-                                    <input type="text" x-model="answers[q.id]" placeholder="Ketik jawaban Anda..."
+                                    <input type="text" x-model="answers[q.id]" @input="triggerAutosave()" placeholder="Ketik jawaban Anda..."
                                            class="w-full px-5 py-4 rounded-xl text-sm font-semibold border border-stone-300 bg-stone-50 text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
                                 </div>
                             </template>
@@ -289,7 +326,7 @@
                             <!-- INPUT TYPE 6: LONG TEXT -->
                             <template x-if="q.tipe_pertanyaan === 'LONG_TEXT'">
                                 <div class="space-y-3 pt-2">
-                                    <textarea x-model="answers[q.id]" rows="4" placeholder="Ketik ulasan atau saran lengkap Anda di sini..."
+                                    <textarea x-model="answers[q.id]" @input="triggerAutosave()" rows="4" placeholder="Ketik ulasan atau saran lengkap Anda di sini..."
                                               class="w-full px-5 py-4 rounded-xl text-sm font-semibold border border-stone-300 bg-stone-50 text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"></textarea>
                                 </div>
                             </template>
@@ -297,7 +334,7 @@
                             <!-- INPUT TYPE 7: DATE INPUT -->
                             <template x-if="q.tipe_pertanyaan === 'DATE' || q.tipe_pertanyaan === 'DATE_INPUT'">
                                 <div class="space-y-3 pt-2">
-                                    <input type="date" x-model="answers[q.id]"
+                                    <input type="date" x-model="answers[q.id]" @change="triggerAutosave()"
                                            class="w-full px-5 py-4 rounded-xl text-sm font-bold border border-stone-300 bg-stone-50 text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
                                     <p class="text-[11px] text-stone-500">Pilih tanggal dari kalender.</p>
                                 </div>
@@ -309,7 +346,7 @@
                                     <div class="p-6 rounded-2xl border-2 border-dashed border-stone-300 bg-stone-50 text-center space-y-3 hover:border-amber-500 transition cursor-pointer relative">
                                         <input type="file"
                                                :accept="q.tipe_pertanyaan === 'IMAGE_UPLOAD' ? 'image/*' : '*'"
-                                               @change="handleFileChange($event, q.id)"
+                                               @change="handleFileChange($event, q.id, q.tipe_pertanyaan)"
                                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                                         <div class="w-12 h-12 rounded-xl bg-stone-200 text-stone-700 text-xl mx-auto flex items-center justify-center">
                                             <span x-text="q.tipe_pertanyaan === 'IMAGE_UPLOAD' ? '🖼️' : '📁'"></span>
@@ -320,9 +357,15 @@
                                         </div>
                                     </div>
                                     <template x-if="files[q.id]">
-                                        <div class="p-3.5 rounded-xl border border-emerald-300 bg-emerald-50 text-xs font-semibold text-emerald-900 flex items-center gap-2">
-                                            <span>✓ File Berhasil Dipilih:</span>
-                                            <span class="truncate font-bold" x-text="files[q.id].name"></span>
+                                        <div class="p-3.5 rounded-xl border border-emerald-300 bg-emerald-50 text-xs font-semibold text-emerald-900 flex items-center justify-between gap-2 shadow-2xs">
+                                            <div class="flex items-center gap-2 truncate">
+                                                <span class="text-emerald-600">✓ File Berhasil Dipilih:</span>
+                                                <span class="truncate font-bold" x-text="files[q.id].name"></span>
+                                            </div>
+                                            <button type="button" @click="removeFile(q.id)" class="px-3 py-1.5 text-[11px] font-bold text-red-700 bg-red-100 hover:bg-red-200 border border-red-200 rounded-lg transition shrink-0 flex items-center gap-1.5 cursor-pointer">
+                                                <span>🗑️</span>
+                                                <span>Hapus File</span>
+                                            </button>
                                         </div>
                                     </template>
                                 </div>
@@ -381,12 +424,107 @@ function studentWizardApp() {
         submitting: false,
         isSubmitted: false,
 
+        // Autosave (Google Form style) properties
+        saveStatus: '', // '' | 'saving' | 'saved'
+        lastSavedTime: '',
+        restoredFromDraft: false,
+        _saveTimer: null,
+
         init() {
             if (this.limitOneResponse) {
                 const storedNisn = localStorage.getItem('survey_submitted_' + this.surveyId);
                 if (storedNisn) {
                     this.isAlreadySubmitted = true;
+                    return;
                 }
+            }
+
+            this.loadDraft();
+
+            // Set up reactive watchers for autosave
+            this.$watch('nisn', () => this.triggerAutosave());
+            this.$watch('step', () => this.triggerAutosave());
+            this.$watch('answers', () => this.triggerAutosave());
+        },
+
+        loadDraft() {
+            try {
+                const raw = localStorage.getItem('survey_draft_' + this.surveyId);
+                if (!raw) return;
+
+                const draft = JSON.parse(raw);
+                if (draft && typeof draft === 'object') {
+                    if (draft.nisn) this.nisn = draft.nisn;
+                    if (draft.answers && typeof draft.answers === 'object') {
+                        this.answers = Object.assign({}, draft.answers);
+                    }
+                    if (typeof draft.step === 'number' && draft.step >= 0 && draft.step <= this.totalQuestions) {
+                        this.step = draft.step;
+                    }
+                    if (draft.savedAt) {
+                        this.lastSavedTime = draft.savedAt;
+                        this.saveStatus = 'saved';
+                    }
+
+                    const hasAnswers = Object.keys(this.answers).some(k => {
+                        const val = this.answers[k];
+                        return val !== undefined && val !== '' && (!Array.isArray(val) || val.length > 0);
+                    });
+                    if (hasAnswers || (this.nisn && this.nisn.trim().length > 0)) {
+                        this.restoredFromDraft = true;
+                    }
+                }
+            } catch (e) {
+                console.warn('Gagal memuat draf survey:', e);
+            }
+        },
+
+        triggerAutosave() {
+            if (this.isClosed || this.isAlreadySubmitted || this.isSubmitted) return;
+
+            this.saveStatus = 'saving';
+            clearTimeout(this._saveTimer);
+
+            this._saveTimer = setTimeout(() => {
+                try {
+                    const now = new Date();
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const mins = String(now.getMinutes()).padStart(2, '0');
+                    const timeStr = `${hours}:${mins}`;
+
+                    const draft = {
+                        nisn: this.nisn,
+                        answers: this.answers,
+                        step: this.step,
+                        savedAt: timeStr
+                    };
+
+                    localStorage.setItem('survey_draft_' + this.surveyId, JSON.stringify(draft));
+                    this.saveStatus = 'saved';
+                    this.lastSavedTime = timeStr;
+                } catch (e) {
+                    console.warn('Autosave error:', e);
+                }
+            }, 350);
+        },
+
+        clearDraft() {
+            try {
+                localStorage.removeItem('survey_draft_' + this.surveyId);
+            } catch (e) {}
+            this.saveStatus = '';
+            this.lastSavedTime = '';
+            this.restoredFromDraft = false;
+        },
+
+        resetDraftConfirm() {
+            if (confirm('Apakah Anda yakin ingin mengosongkan draf dan mengulang pengisian survey dari awal?')) {
+                this.clearDraft();
+                this.answers = {};
+                this.files = {};
+                this.nisn = '';
+                this.step = 0;
+                this.errorMessage = '';
             }
         },
 
@@ -425,13 +563,37 @@ function studentWizardApp() {
             } else {
                 this.answers[qId].push(val);
             }
+            this.answers = Object.assign({}, this.answers);
+            this.triggerAutosave();
         },
 
-        handleFileChange(event, qId) {
+        handleFileChange(event, qId, type) {
+            this.errorMessage = '';
             const file = event.target.files[0];
-            if (file) {
-                this.files[qId] = file;
+            if (!file) return;
+
+            const maxMb = type === 'IMAGE_UPLOAD' ? 5 : 10;
+            if (file.size > maxMb * 1024 * 1024) {
+                const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+                this.errorMessage = `Ukuran file "${file.name}" (${sizeMb} MB) melebihi batas maksimum ${maxMb} MB.`;
+                event.target.value = '';
+                return;
             }
+
+            if (type === 'IMAGE_UPLOAD' && !file.type.startsWith('image/')) {
+                this.errorMessage = `File "${file.name}" bukan gambar yang valid. Harap pilih file JPG, PNG, atau WEBP.`;
+                event.target.value = '';
+                return;
+            }
+
+            this.files[qId] = file;
+            this.triggerAutosave();
+        },
+
+        removeFile(qId) {
+            delete this.files[qId];
+            this.files = Object.assign({}, this.files);
+            this.triggerAutosave();
         },
 
         startSurvey() {
@@ -445,6 +607,7 @@ function studentWizardApp() {
                 return;
             }
             this.step = 1;
+            this.triggerAutosave();
         },
 
         validateCurrentStep() {
@@ -466,6 +629,7 @@ function studentWizardApp() {
         nextStep() {
             if (this.validateCurrentStep() && this.step < this.totalQuestions) {
                 this.step++;
+                this.triggerAutosave();
             }
         },
 
@@ -473,6 +637,7 @@ function studentWizardApp() {
             this.errorMessage = '';
             if (this.step > 0) {
                 this.step--;
+                this.triggerAutosave();
             }
         },
 
@@ -485,16 +650,21 @@ function studentWizardApp() {
             formData.append('nisn', this.nisn.trim());
 
             Object.keys(this.answers).forEach(qId => {
+                // If a file is uploaded for this question, don't append text answer
+                if (this.files[qId]) return;
+
                 const val = this.answers[qId];
                 if (Array.isArray(val)) {
                     val.forEach(item => formData.append(`answers[${qId}][]`, item));
-                } else {
+                } else if (val !== undefined && val !== null && val !== '') {
                     formData.append(`answers[${qId}]`, val);
                 }
             });
 
             Object.keys(this.files).forEach(qId => {
-                formData.append(`answers[${qId}]`, this.files[qId]);
+                if (this.files[qId]) {
+                    formData.append(`answers[${qId}]`, this.files[qId]);
+                }
             });
 
             try {
@@ -503,14 +673,31 @@ function studentWizardApp() {
                     headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                     body: formData
                 });
-                const json = await res.json();
+
+                let json = {};
+                try {
+                    json = await res.json();
+                } catch (jsonErr) {}
+
                 if (!res.ok) {
-                    this.errorMessage = json.error || 'Gagal mengirim jawaban. Coba lagi.';
+                    if (res.status === 413) {
+                        this.errorMessage = 'Ukuran file gambar terlalu besar untuk diproses server. Harap hapus atau pilih file lebih kecil.';
+                    } else if (json.error) {
+                        this.errorMessage = json.error;
+                    } else if (json.message) {
+                        this.errorMessage = json.message;
+                    } else if (json.errors) {
+                        this.errorMessage = Object.values(json.errors).flat().join(', ');
+                    } else {
+                        this.errorMessage = 'Gagal mengirim jawaban. Silakan periksa kembali server/koneksi.';
+                    }
                     return;
                 }
+
                 if (this.limitOneResponse) {
                     localStorage.setItem('survey_submitted_' + this.surveyId, this.nisn.trim());
                 }
+                this.clearDraft();
                 this.isSubmitted = true;
             } catch(e) {
                 this.errorMessage = 'Terjadi kesalahan jaringan. Periksa koneksi internet Anda.';

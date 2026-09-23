@@ -52,6 +52,15 @@ class AiAnalyticsController extends Controller
     {
         try {
             $survey = Survey::findOrFail($id);
+            $respondentCount = $survey->respondents()->count();
+
+            if ($respondentCount < 5) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Jumlah responden belum memenuhi syarat minimal (saat ini {$respondentCount} responden, minimal 5 responden). Kumpulkan setidaknya 5 responden sebelum melakukan analisa AI agar hasil analisis objektif, valid, dan tidak mengalami bias data.",
+                ], 422);
+            }
+
             $analysis = $this->aiService->generateAnalysis($survey);
 
             // Persist generated analysis to survey DB record
@@ -65,6 +74,11 @@ class AiAnalyticsController extends Controller
                 'analysis' => $analysis,
                 'message'  => 'Analisa AI berhasil dibuat dan disimpan.',
             ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,

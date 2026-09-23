@@ -144,10 +144,26 @@
                 <div class="text-3xl">⚠️</div>
                 <h3 class="font-serif font-bold text-lg text-stone-900">Hasil Analisa AI Belum Dibuat</h3>
                 <p class="text-xs text-stone-600 max-w-md mx-auto">
-                    Dokumen ini belum di-generate. Silakan buka halaman analitik survei lalu klik tombol <strong>"✨ Generate Analisa AI"</strong> terlebih dahulu.
+                    @if($totalRespondents < 5)
+                        Dokumen ini belum dapat dibuat karena survei baru memiliki <strong>{{ $totalRespondents }} responden</strong>. Minimal 5 responden diperlukan untuk menjaga objektivitas riset dan mencegah bias data.
+                    @else
+                        Dokumen ini belum di-generate. Silakan buka halaman analitik survei lalu klik tombol <strong>"✨ Generate Analisa AI"</strong> terlebih dahulu.
+                    @endif
                 </p>
             </div>
         @else
+
+            @if($totalRespondents < 5)
+                <!-- ── SAMPLE SIZE BIAS ADVISORY ───────────────────────────────── -->
+                <div class="p-4 rounded-xl border border-rose-300 bg-rose-50 text-rose-900 space-y-1 page-break-inside-avoid">
+                    <div class="flex items-center gap-2 font-bold text-xs">
+                        <span>⚠️ PERINGATAN VALIDITAS SAMPEL ({{ $totalRespondents }} RESPONDEN):</span>
+                    </div>
+                    <p class="text-[11px] leading-relaxed">
+                        Dokumen ini di-generate pada ukuran sampel yang sangat terbatas (hanya {{ $totalRespondents }} responden, di bawah standar minimal 5 responden). Analisis ini memiliki risiko bias ekstrem dan belum merepresentasikan populasi konsumen secara valid. Disarankan untuk menghapus dan memperbarui analisis setelah data responden memadai.
+                    </p>
+                </div>
+            @endif
 
             <!-- ── BAGIAN I: RINGKASAN EKSEKUTIF & SENTIMEN ────────────────────── -->
             <div class="space-y-3 page-break-inside-avoid">
@@ -190,7 +206,7 @@
                     <div class="sm:col-span-4 p-4 rounded-xl border border-emerald-300 bg-emerald-50/50 flex flex-col justify-center">
                         <span class="text-[9px] font-mono uppercase tracking-wider text-emerald-800 font-bold block">SWEET SPOT HARGA JUAL</span>
                         <div class="text-2xl font-serif font-bold text-emerald-950 mt-1">
-                            {{ $aiAnalysis['strategi_harga_wtp']['sweet_spot_harga'] ?? 'Rp 0' }}
+                            {{ $aiAnalysis['strategi_harga_wtp']['sweet_spot_harga'] ?? '-' }}
                         </div>
                         <span class="text-[10px] text-emerald-700 mt-1 font-medium">Titik harga manis ideal berpatokan pada sebaran WTP responden</span>
                     </div>

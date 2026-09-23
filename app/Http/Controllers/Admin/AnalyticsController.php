@@ -215,14 +215,18 @@ class AnalyticsController extends Controller
         $survey = Survey::with(['questions', 'respondents'])->findOrFail($id);
         $totalRespondents = $survey->respondents->count();
 
-        // Load saved analysis or generate if missing
+        // Load saved analysis or generate if missing and sufficient respondents exist
         $aiAnalysis = $survey->ai_analysis;
-        if (empty($aiAnalysis) && $totalRespondents > 0) {
-            $aiAnalysis = $this->aiService->generateAnalysis($survey);
-            $survey->update([
-                'ai_analysis'    => $aiAnalysis,
-                'ai_analyzed_at' => now(),
-            ]);
+        if (empty($aiAnalysis) && $totalRespondents >= 5) {
+            try {
+                $aiAnalysis = $this->aiService->generateAnalysis($survey);
+                $survey->update([
+                    'ai_analysis'    => $aiAnalysis,
+                    'ai_analyzed_at' => now(),
+                ]);
+            } catch (\Throwable $e) {
+                $aiAnalysis = null;
+            }
         }
 
         return view('admin.surveys.print_ai', compact('survey', 'totalRespondents', 'aiAnalysis'));
