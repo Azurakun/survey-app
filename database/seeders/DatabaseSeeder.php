@@ -369,5 +369,8 @@ class DatabaseSeeder extends Seeder
 
         // ─── TEFA TKJ Survey: 500 Responden ───────────────────────────
         $this->call(TefaTkjSurveySeeder::class);
+
+        // ─── Banper PKK 2026 Study Case Survey ────────────────────────
+        $this->call(BanperPkkStudyCaseSeeder::class);
     }
 }

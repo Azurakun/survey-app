@@ -174,20 +174,44 @@ class GeminiAiService
         $apiKey = config('services.gemini.key', env('GEMINI_API_KEY'));
         $prompt = $this->buildPrompt($survey, $totalRespondents, $questionsData, $numberQuestionsWtp, $avgLikert, $avgWtp, $minWtp, $maxWtp, $medianWtp, $sweetSpotWtp, $textFeedback);
 
-        if (empty($apiKey)) {
-            Log::error('[AI CONSULTANT] GEMINI_API_KEY is missing.');
-            throw new \RuntimeException('Kunci API Google Gemini (GEMINI_API_KEY) belum dikonfigurasi. Sistem diwajibkan memproses analisa melalui AI secara langsung dan menolak default sistem.');
+        // Highest priority: Attempt Gemini AI first if API key is present
+        if (!empty($apiKey)) {
+            Log::info('[AI CONSULTANT] [STEP 4/6] Sending analysis request to Google Gemini AI (High Priority)...');
+            $aiResult = $this->callGeminiApi($prompt, $apiKey, $startTime);
+            if ($aiResult) {
+                Log::info('[AI CONSULTANT] ✅ AI ANALYSIS COMPLETE (Gemini API) — ' . round(microtime(true) - $startTime, 2) . 's');
+                return $aiResult;
+            }
+            Log::warning('[AI CONSULTANT] Gemini API failed or all models exhausted. Falling back to Grounded Local Engine.');
+        } else {
+            Log::warning('[AI CONSULTANT] GEMINI_API_KEY is not configured. Falling back to Grounded Local Engine.');
         }
 
-        Log::info('[AI CONSULTANT] [STEP 4/6] Sending analysis request to Google Gemini AI...');
-        $aiResult = $this->callGeminiApi($prompt, $apiKey, $startTime);
-        if ($aiResult) {
-            Log::info('[AI CONSULTANT] ✅ AI ANALYSIS COMPLETE (Gemini API) — ' . round(microtime(true) - $startTime, 2) . 's');
-            return $aiResult;
-        }
+        // Clean Fallback: Default Grounded Non-AI Local Expert Engine
+        Log::info('[AI CONSULTANT] [FALLBACK] Generating Grounded Local Engine analysis...');
+        $localResult = $this->generateLocalEngineAnalysis(
+            $survey,
+            $totalRespondents,
+            $questionsData,
+            $numberQuestionsWtp,
+            $avgLikert,
+            $avgWtp,
+            $minWtp,
+            $maxWtp,
+            $sweetSpotWtp,
+            $textFeedback
+        );
+        $localResult['source'] = 'Grounded Local Engine (Non-AI Fallback)';
+        $localResult['model_used'] = 'Sistem Analitik Lokal Terpadu (Non-AI Default)';
+        $localResult['debug'] = [
+            'model' => 'Non-AI Local Engine',
+            'status' => 'Grounded Local Fallback Active',
+            'execution_time' => round(microtime(true) - $startTime, 2) . 's',
+            'timestamp' => now()->format('Y-m-d H:i:s'),
+            'api_key_configured' => !empty($apiKey),
+        ];
 
-        Log::error('[AI CONSULTANT] Failed to get response from Gemini API.');
-        throw new \RuntimeException('Gagal memproses analisa melalui Google Gemini AI. Sistem diwajibkan hanya menggunakan pemrosesan AI langsung dan menolak penggunaan default sistem.');
+        return $localResult;
     }
 
     private function roundToNearest5000(float $price): int
@@ -401,15 +425,16 @@ PROMPT;
      * 100% Grounded Local Expert Engine Fallback
      * Dynamically constructs recommendations from actual survey questions, choice distributions, WTP questions, and text quotes.
      */
-    private function generateLocalEngineAnalysis(Survey $survey, int $respondents, array $questionsData, array $numberQuestionsWtp, float $avgLikert, float $avgWtp, float $minWtp, float $maxWtp, int $sweetSpotWtp, array $textFeedback): array
+    private function generateLocalEngineAnalysis(Survey $survey, int $respondents, array $questionsData, array $numberQuestionsWtp, ?float $avgLikert, ?float $avgWtp, ?float $minWtp, ?float $maxWtp, ?int $sweetSpotWtp, array $textFeedback): array
     {
         $judul     = $survey->judul;
         $deskripsi = $survey->deskripsi ?? '';
 
+        $effectiveLikert = $avgLikert ?? 4.0;
         // Dynamic sentiment calculation
-        $pctPositif = count($questionsData) > 0 ? min(98, max(55, (int)round(($avgLikert / 5.0) * 100))) : 85;
-        $skorPotensi = min(96, max(60, (int)round(($avgLikert / 5.0) * 85 + ($respondents >= 30 ? 12 : 5))));
-        $tingkatMinat = $avgLikert >= 4.2 ? 'Tinggi (Sangat Positif)' : ($avgLikert >= 3.5 ? 'Sedang (Cukup Positif)' : 'Perlu Evaluasi Ulang');
+        $pctPositif = count($questionsData) > 0 ? min(98, max(55, (int)round(($effectiveLikert / 5.0) * 100))) : 85;
+        $skorPotensi = min(96, max(60, (int)round(($effectiveLikert / 5.0) * 85 + ($respondents >= 30 ? 12 : 5))));
+        $tingkatMinat = $effectiveLikert >= 4.2 ? 'Tinggi (Sangat Positif)' : ($effectiveLikert >= 3.5 ? 'Sedang (Cukup Positif)' : 'Perlu Evaluasi Ulang');
 
         // Extract choice insights per question
         $choiceHighlights = [];
@@ -464,8 +489,9 @@ PROMPT;
             $prodRecs[] = "Terapkan kontrol kualitas (QC) ketat untuk menjamin kepuasan responden pada setiap unit pengerjaan.";
         }
 
+        $likertText = $avgLikert !== null ? ($avgLikert . '/5.0') : 'N/A';
         // Quality & Guarantee
-        $prodRecs[] = "Dengan skor kepuasan Likert rata-rata {$avgLikert}/5.0, terapkan garansi pengerjaan dan keaslian komponen untuk menjaga reputasi merek.";
+        $prodRecs[] = "Dengan evaluasi kepuasan Likert rata-rata {$likertText}, terapkan kontrol mutu ketat dan jaminan kepuasan untuk menjaga reputasi merek.";
 
         // Feedback quote grounding
         if (!empty($textFeedback)) {
@@ -496,14 +522,17 @@ PROMPT;
         $mktRecs[] = "Berikan insentif rujukan (referral program) bagi pembeli yang merekomendasikan produk '{$judul}' kepada rekan/keluarga.";
 
         // ─── DYNAMIC WTP MARGIN STRATEGY ───────────────────────────────────────
-        $sweetSpotPrimary = !empty($numberQuestionsWtp) ? $numberQuestionsWtp[0]['sweet_spot'] : ('Rp ' . number_format($sweetSpotWtp, 0, ',', '.'));
+        $sweetSpotPrimary = !empty($numberQuestionsWtp) 
+            ? $numberQuestionsWtp[0]['sweet_spot'] 
+            : ($sweetSpotWtp !== null ? ('Rp ' . number_format($sweetSpotWtp, 0, ',', '.')) : 'Sesuai kalkulasi HPP');
         
         if (!empty($wtpBreakdownText)) {
-            $rekomendasiMargin = "Berdasarkan evaluasi Willingness To Pay (WTP) dari {$respondents} responden terverifikasi, berikut rincian sweet spot tarif per layanan:\n\n" .
+            $rekomendasiMargin = "Berdasarkan evaluasi Willingness To Pay (WTP) dari {$respondents} responden terverifikasi, berikut rincian sweet spot tarif per produk/layanan:\n\n" .
                 implode("\n", $wtpBreakdownText) .
                 "\n\nDisarankan menetapkan Harga Pokok Penjualan (HPP) maksimal 65-70% dari masing-masing sweet spot untuk mengamankan margin keuntungan kotor 30-35% yang sehat.";
         } else {
-            $rekomendasiMargin = "Berdasarkan evaluasi Willingness To Pay (WTP) dari {$respondents} responden terverifikasi, sweet spot harga utama dipatok pada nominal Rp " . number_format($sweetSpotWtp, 0, ',', '.') . " per unit. Disarankan menetapkan HPP maksimal 65-70% untuk mengamankan margin kotor 30-35%.";
+            $wtpDisplay = $sweetSpotWtp !== null ? ('Rp ' . number_format($sweetSpotWtp, 0, ',', '.')) : 'harga pasar terjangkau';
+            $rekomendasiMargin = "Berdasarkan evaluasi daya beli dari {$respondents} responden terverifikasi, patokan harga utama dipatok pada nominal {$wtpDisplay} per unit. Disarankan menetapkan HPP maksimal 65-70% untuk mengamankan margin kotor 30-35%.";
         }
 
         // ─── DYNAMIC ACTION PLAN ───────────────────────────────────────────────
@@ -520,7 +549,7 @@ PROMPT;
             ? "Pilihan utama responden paling menonjol pada '" . $choiceHighlights[0]['top_opsi'] . "' (" . $choiceHighlights[0]['persentase'] . " pemilih)."
             : "Konsep produk diterima dengan baik oleh calon konsumen.";
 
-        $ringkasanEksekutif = "Berdasarkan analisis riset pasar terhadap data {$respondents} responden terverifikasi pada proyek survei \"{$judul}\", hasil evaluasi menunjukkan potensi bisnis yang prospektif. Skor kepuasan Likert rata-rata mencapai {$avgLikert} dari 5.0 dengan tingkat sentimen positif sebesar {$pctPositif}%. {$topChoiceSummary} Dengan estimasi daya beli WTP yang terukur, produk/layanan ini memiliki fondasi pasar yang solid untuk dikembangkan menjadi usaha kewirausahaan yang menguntungkan.";
+        $ringkasanEksekutif = "Berdasarkan analisis riset pasar terhadap data {$respondents} responden terverifikasi pada proyek survei \"{$judul}\", hasil evaluasi menunjukkan potensi bisnis yang prospektif. Skor kepuasan Likert rata-rata mencapai {$likertText} dengan tingkat sentimen positif sebesar {$pctPositif}%. {$topChoiceSummary} Dengan estimasi daya beli WTP yang terukur, produk/layanan ini memiliki fondasi pasar yang solid untuk dikembangkan menjadi usaha kewirausahaan yang menguntungkan.";
 
         $growthLikelihood = $skorPotensi >= 85 ? 'Sangat Tinggi (High Growth)' : ($skorPotensi >= 70 ? 'Potensial (Good Growth)' : 'Moderat (Need Optimization)');
 
@@ -542,7 +571,7 @@ PROMPT;
             'analisis_sentimen'   => [
                 'tingkat_minat'      => $tingkatMinat,
                 'persentase_positif' => $pctPositif,
-                'penjelasan'         => "Sentimen pasar bernilai positif dengan skor Likert rata-rata {$avgLikert}/5.0. Pendorong utama sentimen adalah tingginya minat responden terhadap " . (!empty($choiceHighlights) ? "'" . $choiceHighlights[0]['top_opsi'] . "'" : "produk") . " serta kejelasan garansi dan harga WTP yang rasional."
+                'penjelasan'         => "Sentimen pasar bernilai positif dengan skor Likert rata-rata {$likertText}. Pendorong utama sentimen adalah tingginya minat responden terhadap " . (!empty($choiceHighlights) ? "'" . $choiceHighlights[0]['top_opsi'] . "'" : "produk") . " serta kejelasan garansi dan harga WTP yang rasional."
             ],
             'strategi_harga_wtp' => [
                 'sweet_spot_harga'   => $sweetSpotPrimary,
