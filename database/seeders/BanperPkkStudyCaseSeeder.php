@@ -29,11 +29,11 @@ class BanperPkkStudyCaseSeeder extends Seeder
         }
 
         // ═════════════════════════════════════════════════════════════════════
-        // SURVEY: RISET PASAR & ANALISIS SWEET SPOT PRODUK BANPER PKK 2026
-        // 4 Kelompok Kewirausahaan:
+        // SURVEY: RISET PASAR & EVALUASI SWEET SPOT PRODUK BANPER PKK 2026
+        // 4 Kelompok Siswa:
         // 1. JANGKAR MAS (Olahan Ikan & Hasil Laut - Pembimbing: Nina Komalasari, S.Pi)
-        // 2. KULINJER (Kuliner & Kudapan Khas Indramayu - Pembimbing: Cipto Karaton, S.Pi)
-        // 3. SANTAP (Sajian Makanan Cepat Saji / Rice Bowl - Pembimbing: Dandi Saefudin, S.Tr.Pi)
+        // 2. KULINJER (Snack & Kudapan Khas Indramayu - Pembimbing: Cipto Karaton, S.Pi)
+        // 3. SANTAP (Makanan Siap Saji / Rice Bowl - Pembimbing: Dandi Saefudin, S.Tr.Pi)
         // 4. SUSU KEDELAI NUMANI (Minuman Kedelai Alami - Pembimbing: Dian Novitasari, S.Tr.T)
         // ═════════════════════════════════════════════════════════════════════
         $survey = Survey::create([
@@ -42,7 +42,7 @@ class BanperPkkStudyCaseSeeder extends Seeder
             'deskripsi'           => 'Survey riset preferensi konsumen, uji cita rasa, kemasan, saluran distribusi, dan penentuan sweet spot harga (WTP) untuk 4 Kelompok Kewirausahaan Siswa Banper PKK 2026 SMKN 2 Indramayu: Jangkar Mas, Kulinjer, Santap, dan Susu Kedelai Numani.',
             'status'              => 'PUBLISHED',
             'limit_one_response'  => false,
-            'tanggal_mulai'       => now()->subDays(7)->toDateString(),
+            'tanggal_mulai'       => now()->subDays(14)->toDateString(),
             'tanggal_selesai'     => now()->addDays(30)->toDateString(),
         ]);
 
@@ -52,14 +52,26 @@ class BanperPkkStudyCaseSeeder extends Seeder
             [
                 'tipe'  => 'SINGLE_CHOICE',
                 'teks'  => 'Dari 4 unit usaha kewirausahaan Banper PKK 2026 berikut, kategori produk mana yang paling menarik perhatian Anda untuk dibeli?',
-                'opsi'  => ['JANGKAR MAS (Olahan Ikan & Hasil Laut Pesisir)', 'KULINJER (Snack & Kudapan Khas Indramayu)', 'SANTAP (Menu Makanan Siap Saji / Rice Bowl)', 'SUSU KEDELAI NUMANI (Minuman Kedelai Alami Aneka Rasa)'],
+                'opsi'  => [
+                    'JANGKAR MAS (Olahan Ikan & Hasil Laut Pesisir)',
+                    'KULINJER (Snack & Kudapan Khas Indramayu)',
+                    'SANTAP (Menu Makanan Siap Saji / Rice Bowl)',
+                    'SUSU KEDELAI NUMANI (Minuman Kedelai Alami Aneka Rasa)'
+                ],
                 'wajib' => true,
             ],
             // Q2: MULTIPLE_CHOICE - Varian Rasa Susu Kedelai Numani
             [
                 'tipe'  => 'MULTIPLE_CHOICE',
                 'teks'  => '[SUSU KEDELAI NUMANI] Varian rasa susu kedelai apa saja yang paling Anda inginkan? (Boleh pilih lebih dari satu)',
-                'opsi'  => ['Original Vanilla', 'Cokelat Belgia', 'Matcha Green Tea', 'Gula Aren Organik', 'Strawberry Cream', 'Kopi Kedelai'],
+                'opsi'  => [
+                    'Original Vanilla',
+                    'Cokelat Belgia',
+                    'Matcha Green Tea',
+                    'Gula Aren Organik',
+                    'Strawberry Cream',
+                    'Kopi Kedelai'
+                ],
                 'wajib' => true,
             ],
             // Q3: NUMBER - WTP Susu Kedelai Numani (Sweet Spot 1)
@@ -73,7 +85,12 @@ class BanperPkkStudyCaseSeeder extends Seeder
             [
                 'tipe'  => 'SINGLE_CHOICE',
                 'teks'  => '[JANGKAR MAS] Produk olahan perikanan mana yang paling berpotensi Anda beli secara rutin?',
-                'opsi'  => ['Abon Ikan Bandeng Tanpa Duri', 'Kerupuk Ikan Tenggiri Khas Pesisir', 'Nugget Ikan Laut Crispy', 'Sambal Cumi / Teri Balado Kemasan'],
+                'opsi'  => [
+                    'Abon Ikan Bandeng Tanpa Duri',
+                    'Kerupuk Ikan Tenggiri Khas Pesisir',
+                    'Nugget Ikan Laut Crispy',
+                    'Sambal Cumi / Teri Balado Kemasan'
+                ],
                 'wajib' => true,
             ],
             // Q5: NUMBER - WTP Jangkar Mas (Sweet Spot 2)
@@ -87,7 +104,13 @@ class BanperPkkStudyCaseSeeder extends Seeder
             [
                 'tipe'  => 'MULTIPLE_CHOICE',
                 'teks'  => '[KULINJER] Jenis kudapan dan snack khas apa yang paling Anda harapkan diproduksi kelompok Kulinjer? (Boleh pilih lebih dari satu)',
-                'opsi'  => ['Keripik Tette / Singkong Pedas Manis', 'Stik Keju Rumput Laut', 'Rengginang Mini Aneka Bumbu', 'Pastel Kering Isi Abon Ikan', 'Kue Kering Khas Mangga'],
+                'opsi'  => [
+                    'Keripik Tette / Singkong Pedas Manis',
+                    'Stik Keju Rumput Laut',
+                    'Rengginang Mini Aneka Bumbu',
+                    'Pastel Kering Isi Abon Ikan',
+                    'Kue Kering Khas Mangga'
+                ],
                 'wajib' => true,
             ],
             // Q7: NUMBER - WTP Kulinjer (Sweet Spot 3)
@@ -101,7 +124,12 @@ class BanperPkkStudyCaseSeeder extends Seeder
             [
                 'tipe'  => 'SINGLE_CHOICE',
                 'teks'  => '[SANTAP] Menu rice bowl / sajian cepat saji apa yang paling menggugah selera Anda untuk sarapan atau makan siang?',
-                'opsi'  => ['Rice Bowl Cumi Saus Tiram Telur Mata Sapi', 'Rice Bowl Ayam Suwir Pedas Kemangi', 'Rice Bowl Ikan Asam Manis Sayur Segar', 'Nasi Bakar Tongkol Rica-Rica'],
+                'opsi'  => [
+                    'Rice Bowl Cumi Saus Tiram Telur Mata Sapi',
+                    'Rice Bowl Ayam Suwir Pedas Kemangi',
+                    'Rice Bowl Ikan Asam Manis Sayur Segar',
+                    'Nasi Bakar Tongkol Rica-Rica'
+                ],
                 'wajib' => true,
             ],
             // Q9: NUMBER - WTP Santap (Sweet Spot 4)
@@ -129,21 +157,37 @@ class BanperPkkStudyCaseSeeder extends Seeder
             [
                 'tipe'  => 'MULTIPLE_CHOICE',
                 'teks'  => 'Faktor apa saja yang paling mempengaruhi keputusan Anda saat membeli produk kuliner & minuman kewirausahaan sekolah? (Pilih yang relevan)',
-                'opsi'  => ['Cita Rasa yang Lezat & Konsisten', 'Harga Bersahabat bagi Pelajar/Guru', 'Kebersihan & Legalitas Halal/P-IRT', 'Kemasan Modern & Praktis Dibawa', 'Mendukung Kreativitas Siswa Sekolah'],
+                'opsi'  => [
+                    'Cita Rasa yang Lezat & Konsisten',
+                    'Harga Bersahabat bagi Pelajar/Guru',
+                    'Kebersihan & Legalitas Halal/P-IRT',
+                    'Kemasan Modern & Praktis Dibawa',
+                    'Mendukung Kreativitas Siswa Sekolah'
+                ],
                 'wajib' => true,
             ],
             // Q13: SINGLE_CHOICE - Estimasi Frekuensi Konsumsi
             [
                 'tipe'  => 'SINGLE_CHOICE',
                 'teks'  => 'Seberapa sering Anda memperkirakan akan membeli produk-produk kewirausahaan Banper PKK 2026 jika sudah tersedia rutin?',
-                'opsi'  => ['Hampir Setiap Hari Sekolah (3-5 kali seminggu)', '1 - 2 Kali Seminggu', '2 - 3 Kali Sebulan', 'Hanya Saat Acara Khusus / Bazar Pameran'],
+                'opsi'  => [
+                    'Hampir Setiap Hari Sekolah (3-5 kali seminggu)',
+                    '1 - 2 Kali Seminggu',
+                    '2 - 3 Kali Sebulan',
+                    'Hanya Saat Acara Khusus / Bazar Pameran'
+                ],
                 'wajib' => true,
             ],
             // Q14: SINGLE_CHOICE - Preferensi Saluran Pembelian
             [
                 'tipe'  => 'SINGLE_CHOICE',
                 'teks'  => 'Melalui jalur mana Anda paling nyaman memesan atau membeli produk dari 4 kelompok ini?',
-                'opsi'  => ['Kantin & Galeri Kewirausahaan SMKN 2 Indramayu', 'Pre-Order melalui WhatsApp Bisnis / Grup Kelas', 'Bazar Rutin Tiap Hari Jumat di Sekolah', 'Titip Jual di Koperasi Sekolah'],
+                'opsi'  => [
+                    'Kantin & Galeri Kewirausahaan SMKN 2 Indramayu',
+                    'Pre-Order melalui WhatsApp Bisnis / Grup Kelas',
+                    'Bazar Rutin Tiap Hari Jumat di Sekolah',
+                    'Titip Jual di Koperasi Sekolah'
+                ],
                 'wajib' => true,
             ],
             // Q15: LIKERT - Kesediaan Merekomendasikan (NPS / Dukungan)
@@ -190,459 +234,244 @@ class BanperPkkStudyCaseSeeder extends Seeder
         }
 
         // ═════════════════════════════════════════════════════════════════════
-        // 20 GROUNDED RESPONDENTS WITH REALISTIC ANSWERS
+        // POOLS FOR REALISTIC GROUNDED DATA GENERATION (125 RESPONDENTS)
         // ═════════════════════════════════════════════════════════════════════
-        $respondentsData = [
-            [
-                'nisn' => '0068112001',
-                'q1'  => 'SANTAP (Menu Makanan Siap Saji / Rice Bowl)',
-                'q2'  => ['Cokelat Belgia', 'Matcha Green Tea'],
-                'q3'  => 6000,
-                'q4'  => 'Sambal Cumi / Teri Balado Kemasan',
-                'q5'  => 18000,
-                'q6'  => ['Stik Keju Rumput Laut', 'Rengginang Mini Aneka Bumbu'],
-                'q7'  => 10000,
-                'q8'  => 'Rice Bowl Cumi Saus Tiram Telur Mata Sapi',
-                'q9'  => 15000,
-                'q10' => '5',
-                'q11' => '5',
-                'q12' => ['Cita Rasa yang Lezat & Konsisten', 'Harga Bersahabat bagi Pelajar/Guru', 'Kebersihan & Legalitas Halal/P-IRT'],
-                'q13' => '1 - 2 Kali Seminggu',
-                'q14' => 'Kantin & Galeri Kewirausahaan SMKN 2 Indramayu',
-                'q15' => '5',
-                'q16' => 'Rasa Juara Karya Siswa',
-                'q17' => 'Paket hemat kombo Rice Bowl Santap plus Susu Kedelai dingin seharga Rp 20.000',
-                'q18' => 'Untuk kelompok Santap, pastikan nasi disajikan hangat dan sambal cuminya tidak terlalu berminyak. Susu kedelai Numani cokelat sangat segar jika disajikan dingin.',
-            ],
-            [
-                'nisn' => '0068112002',
-                'q1'  => 'SUSU KEDELAI NUMANI (Minuman Kedelai Alami Aneka Rasa)',
-                'q2'  => ['Original Vanilla', 'Gula Aren Organik'],
-                'q3'  => 5000,
-                'q4'  => 'Abon Ikan Bandeng Tanpa Duri',
-                'q5'  => 15000,
-                'q6'  => ['Keripik Tette / Singkong Pedas Manis'],
-                'q7'  => 8000,
-                'q8'  => 'Rice Bowl Ayam Suwir Pedas Kemangi',
-                'q9'  => 14000,
-                'q10' => '4',
-                'q11' => '4',
-                'q12' => ['Harga Bersahabat bagi Pelajar/Guru', 'Kemasan Modern & Praktis Dibawa'],
-                'q13' => 'Hampir Setiap Hari Sekolah (3-5 kali seminggu)',
-                'q14' => 'Kantin & Galeri Kewirausahaan SMKN 2 Indramayu',
-                'q15' => '4',
-                'q16' => 'Sehat Alami Setiap Hari',
-                'q17' => 'Botol 250ml siap minum dengan segel plastik steril',
-                'q18' => 'Susu kedelai Numani sangat cocok untuk alternatif minuman sehat pengganti es teh manis. Pertahankan rasa kedelai alami tanpa bau langu.',
-            ],
-            [
-                'nisn' => '0068112003',
-                'q1'  => 'JANGKAR MAS (Olahan Ikan & Hasil Laut Pesisir)',
-                'q2'  => ['Original Vanilla', 'Strawberry Cream'],
-                'q3'  => 7000,
-                'q4'  => 'Kerupuk Ikan Tenggiri Khas Pesisir',
-                'q5'  => 20000,
-                'q6'  => ['Pastel Kering Isi Abon Ikan', 'Kue Kering Khas Mangga'],
-                'q7'  => 12000,
-                'q8'  => 'Rice Bowl Ikan Asam Manis Sayur Segar',
-                'q9'  => 16000,
-                'q10' => '5',
-                'q11' => '5',
-                'q12' => ['Cita Rasa yang Lezat & Konsisten', 'Mendukung Kreativitas Siswa Sekolah'],
-                'q13' => '1 - 2 Kali Seminggu',
-                'q14' => 'Pre-Order melalui WhatsApp Bisnis / Grup Kelas',
-                'q15' => '5',
-                'q16' => 'Cita Rasa Bahari Asli Indramayu',
-                'q17' => 'Standing pouch ziplock agar kerupuk ikan tetap renyah tahan lama',
-                'q18' => 'Kelompok Jangkar Mas punya potensi besar untuk oleh-oleh khas daerah. Desain labelnya harus dibuat elegan agar bisa dititipkan di minimarket dan rest area.',
-            ],
-            [
-                'nisn' => '0068112004',
-                'q1'  => 'KULINJER (Snack & Kudapan Khas Indramayu)',
-                'q2'  => ['Cokelat Belgia', 'Kopi Kedelai'],
-                'q3'  => 6000,
-                'q4'  => 'Nugget Ikan Laut Crispy',
-                'q5'  => 18000,
-                'q6'  => ['Keripik Tette / Singkong Pedas Manis', 'Stik Keju Rumput Laut'],
-                'q7'  => 10000,
-                'q8'  => 'Nasi Bakar Tongkol Rica-Rica',
-                'q9'  => 15000,
-                'q10' => '4',
-                'q11' => '4',
-                'q12' => ['Cita Rasa yang Lezat & Konsisten', 'Harga Bersahabat bagi Pelajar/Guru'],
-                'q13' => '2 - 3 Kali Sebulan',
-                'q14' => 'Bazar Rutin Tiap Hari Jumat di Sekolah',
-                'q15' => '4',
-                'q16' => 'Ngemil Asik Khas Indramayu',
-                'q17' => 'Pouch travel pack 100 gram dengan varian pedas berlevel',
-                'q18' => 'Camilan Kulinjer sangat pas untuk teman belajar kelompok. Tingkat kepedasannya mohon dibuat pilihan level 1 sampai 3.',
-            ],
-            [
-                'nisn' => '0068112005',
-                'q1'  => 'SANTAP (Menu Makanan Siap Saji / Rice Bowl)',
-                'q2'  => ['Matcha Green Tea', 'Gula Aren Organik'],
-                'q3'  => 8000,
-                'q4'  => 'Abon Ikan Bandeng Tanpa Duri',
-                'q5'  => 22000,
-                'q6'  => ['Stik Keju Rumput Laut'],
-                'q7'  => 10000,
-                'q8'  => 'Rice Bowl Cumi Saus Tiram Telur Mata Sapi',
-                'q9'  => 18000,
-                'q10' => '5',
-                'q11' => '5',
-                'q12' => ['Kebersihan & Legalitas Halal/P-IRT', 'Kemasan Modern & Praktis Dibawa'],
-                'q13' => '1 - 2 Kali Seminggu',
-                'q14' => 'Kantin & Galeri Kewirausahaan SMKN 2 Indramayu',
-                'q15' => '5',
-                'q16' => 'Makan Enak, Cepat & Higienis',
-                'q17' => 'Paper bowl ramah lingkungan yang tahan panas microwave',
-                'q18' => 'Penyajian Rice Bowl Santap harus cepat saat jam istirahat agar siswa tidak telat masuk kelas. Rasa cumi saus tiramnya sangat istimewa.',
-            ],
-            [
-                'nisn' => '0068112006',
-                'q1'  => 'SUSU KEDELAI NUMANI (Minuman Kedelai Alami Aneka Rasa)',
-                'q2'  => ['Original Vanilla', 'Cokelat Belgia', 'Strawberry Cream'],
-                'q3'  => 5000,
-                'q4'  => 'Sambal Cumi / Teri Balado Kemasan',
-                'q5'  => 16000,
-                'q6'  => ['Rengginang Mini Aneka Bumbu'],
-                'q7'  => 9000,
-                'q8'  => 'Rice Bowl Ayam Suwir Pedas Kemangi',
-                'q9'  => 13000,
-                'q10' => '4',
-                'q11' => '4',
-                'q12' => ['Harga Bersahabat bagi Pelajar/Guru', 'Cita Rasa yang Lezat & Konsisten'],
-                'q13' => 'Hampir Setiap Hari Sekolah (3-5 kali seminggu)',
-                'q14' => 'Titip Jual di Koperasi Sekolah',
-                'q15' => '4',
-                'q16' => 'Kesegaran Kedelai Asli Pelajar',
-                'q17' => 'Cup press atau botol 250ml dengan label komposisi jelas',
-                'q18' => 'Susu kedelai Numani rasa stroberi sangat disukai siswi. Harganya kalau bisa tetap Rp 5.000 - Rp 6.000 agar ramah kantong siswa.',
-            ],
-            [
-                'nisn' => '0068112007',
-                'q1'  => 'JANGKAR MAS (Olahan Ikan & Hasil Laut Pesisir)',
-                'q2'  => ['Gula Aren Organik'],
-                'q3'  => 6000,
-                'q4'  => 'Nugget Ikan Laut Crispy',
-                'q5'  => 25000,
-                'q6'  => ['Pastel Kering Isi Abon Ikan'],
-                'q7'  => 11000,
-                'q8'  => 'Nasi Bakar Tongkol Rica-Rica',
-                'q9'  => 15000,
-                'q10' => '5',
-                'q11' => '5',
-                'q12' => ['Cita Rasa yang Lezat & Konsisten', 'Mendukung Kreativitas Siswa Sekolah'],
-                'q13' => '1 - 2 Kali Seminggu',
-                'q14' => 'Bazar Rutin Tiap Hari Jumat di Sekolah',
-                'q15' => '5',
-                'q16' => 'Hasil Laut Juara SMKN 2',
-                'q17' => 'Frozen pack vakum 250 gram untuk nugget dan abon ikan',
-                'q18' => 'Jangkar Mas membuktikan potensi jurusan perikanan SMKN 2 Indramayu. Nugget ikannya gurih dan tidak amis sama sekali, sangat cocok untuk bekal anak.',
-            ],
-            [
-                'nisn' => '0068112008',
-                'q1'  => 'KULINJER (Snack & Kudapan Khas Indramayu)',
-                'q2'  => ['Cokelat Belgia', 'Matcha Green Tea'],
-                'q3'  => 7000,
-                'q4'  => 'Kerupuk Ikan Tenggiri Khas Pesisir',
-                'q5'  => 18000,
-                'q6'  => ['Keripik Tette / Singkong Pedas Manis', 'Kue Kering Khas Mangga'],
-                'q7'  => 10000,
-                'q8'  => 'Rice Bowl Ikan Asam Manis Sayur Segar',
-                'q9'  => 15000,
-                'q10' => '4',
-                'q11' => '4',
-                'q12' => ['Kemasan Modern & Praktis Dibawa', 'Harga Bersahabat bagi Pelajar/Guru'],
-                'q13' => '2 - 3 Kali Sebulan',
-                'q14' => 'Kantin & Galeri Kewirausahaan SMKN 2 Indramayu',
-                'q15' => '4',
-                'q16' => 'Krenyes Gurih Tradisional Modern',
-                'q17' => 'Kemasan toples mini untuk hampers hari raya atau acara sekolah',
-                'q18' => 'Kulinjer perlu memanfaatkan olahan mangga khas Indramayu lebih optimal sebagai pembeda dengan camilan daerah lain.',
-            ],
-            [
-                'nisn' => '0068112009',
-                'q1'  => 'SANTAP (Menu Makanan Siap Saji / Rice Bowl)',
-                'q2'  => ['Original Vanilla'],
-                'q3'  => 6000,
-                'q4'  => 'Sambal Cumi / Teri Balado Kemasan',
-                'q5'  => 20000,
-                'q6'  => ['Stik Keju Rumput Laut'],
-                'q7'  => 9000,
-                'q8'  => 'Rice Bowl Cumi Saus Tiram Telur Mata Sapi',
-                'q9'  => 16000,
-                'q10' => '5',
-                'q11' => '4',
-                'q12' => ['Cita Rasa yang Lezat & Konsisten', 'Kebersihan & Legalitas Halal/P-IRT'],
-                'q13' => '1 - 2 Kali Seminggu',
-                'q14' => 'Pre-Order melalui WhatsApp Bisnis / Grup Kelas',
-                'q15' => '5',
-                'q16' => 'Santapan Mantap Rasa Hebat',
-                'q17' => 'Porsi regular dan jumbo dengan opsi tambahan sambal sachet',
-                'q18' => 'Pilihan lauk seafood di Santap sangat sesuai dengan ciri khas pesisir Indramayu. Pertahankan bumbu gurihnya.',
-            ],
-            [
-                'nisn' => '0068112010',
-                'q1'  => 'SUSU KEDELAI NUMANI (Minuman Kedelai Alami Aneka Rasa)',
-                'q2'  => ['Cokelat Belgia', 'Kopi Kedelai'],
-                'q3'  => 5000,
-                'q4'  => 'Abon Ikan Bandeng Tanpa Duri',
-                'q5'  => 17000,
-                'q6'  => ['Rengginang Mini Aneka Bumbu'],
-                'q7'  => 8000,
-                'q8'  => 'Rice Bowl Ayam Suwir Pedas Kemangi',
-                'q9'  => 14000,
-                'q10' => '4',
-                'q11' => '4',
-                'q12' => ['Harga Bersahabat bagi Pelajar/Guru', 'Mendukung Kreativitas Siswa Sekolah'],
-                'q13' => 'Hampir Setiap Hari Sekolah (3-5 kali seminggu)',
-                'q14' => 'Titip Jual di Koperasi Sekolah',
-                'q15' => '4',
-                'q16' => 'Energi Kedelai Sehat Setiap Saat',
-                'q17' => 'Pouch standing dengan sedotan higienis terbungkus plastik',
-                'q18' => 'Kopi kedelai Numani sangat unik! Rasanya pas untuk teman belajar di perpustakaan tanpa membuat asam lambung naik.',
-            ],
-            [
-                'nisn' => '0068112011',
-                'q1'  => 'JANGKAR MAS (Olahan Ikan & Hasil Laut Pesisir)',
-                'q2'  => ['Matcha Green Tea', 'Strawberry Cream'],
-                'q3'  => 7000,
-                'q4'  => 'Abon Ikan Bandeng Tanpa Duri',
-                'q5'  => 22000,
-                'q6'  => ['Pastel Kering Isi Abon Ikan'],
-                'q7'  => 11000,
-                'q8'  => 'Nasi Bakar Tongkol Rica-Rica',
-                'q9'  => 15000,
-                'q10' => '5',
-                'q11' => '5',
-                'q12' => ['Kebersihan & Legalitas Halal/P-IRT', 'Cita Rasa yang Lezat & Konsisten'],
-                'q13' => '1 - 2 Kali Seminggu',
-                'q14' => 'Kantin & Galeri Kewirausahaan SMKN 2 Indramayu',
-                'q15' => '5',
-                'q16' => 'Ikan Olahan Berkualitas Pesisir',
-                'q17' => 'Toples segel alumunium foil untuk abon bandeng agar awet 6 bulan',
-                'q18' => 'Abon bandeng Jangkar Mas tanpa duri sangat disukai guru dan orang tua murid. Kemasannya sudah layak masuk supermarket.',
-            ],
-            [
-                'nisn' => '0068112012',
-                'q1'  => 'SANTAP (Menu Makanan Siap Saji / Rice Bowl)',
-                'q2'  => ['Gula Aren Organik', 'Original Vanilla'],
-                'q3'  => 6000,
-                'q4'  => 'Kerupuk Ikan Tenggiri Khas Pesisir',
-                'q5'  => 19000,
-                'q6'  => ['Stik Keju Rumput Laut'],
-                'q7'  => 10000,
-                'q8'  => 'Rice Bowl Ayam Suwir Pedas Kemangi',
-                'q9'  => 15000,
-                'q10' => '4',
-                'q11' => '5',
-                'q12' => ['Cita Rasa yang Lezat & Konsisten', 'Kemasan Modern & Praktis Dibawa'],
-                'q13' => '1 - 2 Kali Seminggu',
-                'q14' => 'Pre-Order melalui WhatsApp Bisnis / Grup Kelas',
-                'q15' => '5',
-                'q16' => 'Kelezatan Nasi Bowl Idola',
-                'q17' => 'Bowl bersekat pemisah kuah/saus agar tidak lembek saat dibawa jalan',
-                'q18' => 'Porsi nasi dan lauk ayam suwir kemangi di Santap sangat pas mengenyangkan. Pelayanan ramah dan pesanan via WA cepat ditanggapi.',
-            ],
-            [
-                'nisn' => '0068112013',
-                'q1'  => 'KULINJER (Snack & Kudapan Khas Indramayu)',
-                'q2'  => ['Cokelat Belgia'],
-                'q3'  => 5000,
-                'q4'  => 'Sambal Cumi / Teri Balado Kemasan',
-                'q5'  => 16000,
-                'q6'  => ['Keripik Tette / Singkong Pedas Manis', 'Rengginang Mini Aneka Bumbu'],
-                'q7'  => 9000,
-                'q8'  => 'Rice Bowl Cumi Saus Tiram Telur Mata Sapi',
-                'q9'  => 14000,
-                'q10' => '4',
-                'q11' => '4',
-                'q12' => ['Harga Bersahabat bagi Pelajar/Guru', 'Cita Rasa yang Lezat & Konsisten'],
-                'q13' => '2 - 3 Kali Sebulan',
-                'q14' => 'Bazar Rutin Tiap Hari Jumat di Sekolah',
-                'q15' => '4',
-                'q16' => 'Rasa Asli Cemilan Indramayu',
-                'q17' => 'Kemasan ekonomis harga Rp 5.000 untuk jajanan harian di kantin',
-                'q18' => 'Keripik singkong Kulinjer teksturnya sangat renyah dan bumbu pedas manisnya meresap. Sukses terus untuk tim Kulinjer.',
-            ],
-            [
-                'nisn' => '0068112014',
-                'q1'  => 'SUSU KEDELAI NUMANI (Minuman Kedelai Alami Aneka Rasa)',
-                'q2'  => ['Matcha Green Tea', 'Original Vanilla'],
-                'q3'  => 6000,
-                'q4'  => 'Nugget Ikan Laut Crispy',
-                'q5'  => 18000,
-                'q6'  => ['Kue Kering Khas Mangga'],
-                'q7'  => 10000,
-                'q8'  => 'Rice Bowl Ikan Asam Manis Sayur Segar',
-                'q9'  => 15000,
-                'q10' => '5',
-                'q11' => '4',
-                'q12' => ['Kebersihan & Legalitas Halal/P-IRT', 'Harga Bersahabat bagi Pelajar/Guru'],
-                'q13' => 'Hampir Setiap Hari Sekolah (3-5 kali seminggu)',
-                'q14' => 'Kantin & Galeri Kewirausahaan SMKN 2 Indramayu',
-                'q15' => '5',
-                'q16' => 'Susu Sehat Generasi Hebat',
-                'q17' => 'Sediakan opsi botol 500ml untuk konsumsi keluarga di rumah',
-                'q18' => 'Susu Kedelai Numani Matcha punya aroma teh hijau yang wangi dan manisnya seimbang. Sangat direkomendasikan untuk program gizi anak.',
-            ],
-            [
-                'nisn' => '0068112015',
-                'q1'  => 'JANGKAR MAS (Olahan Ikan & Hasil Laut Pesisir)',
-                'q2'  => ['Cokelat Belgia', 'Gula Aren Organik'],
-                'q3'  => 7000,
-                'q4'  => 'Sambal Cumi / Teri Balado Kemasan',
-                'q5'  => 24000,
-                'q6'  => ['Pastel Kering Isi Abon Ikan'],
-                'q7'  => 12000,
-                'q8'  => 'Nasi Bakar Tongkol Rica-Rica',
-                'q9'  => 16000,
-                'q10' => '5',
-                'q11' => '5',
-                'q12' => ['Cita Rasa yang Lezat & Konsisten', 'Kebersihan & Legalitas Halal/P-IRT'],
-                'q13' => '1 - 2 Kali Seminggu',
-                'q14' => 'Pre-Order melalui WhatsApp Bisnis / Grup Kelas',
-                'q15' => '5',
-                'q16' => 'Sambal Pesisir Gurih Menggigit',
-                'q17' => 'Jar kaca atau plastik food-grade tahan tumpah dengan seal alumunium',
-                'q18' => 'Sambal cumi Jangkar Mas cuminya melimpah dan tidak pelit. Rasa pedasnya pas di lidah masyarakat Jawa Barat.',
-            ],
-            [
-                'nisn' => '0068112016',
-                'q1'  => 'SANTAP (Menu Makanan Siap Saji / Rice Bowl)',
-                'q2'  => ['Kopi Kedelai', 'Original Vanilla'],
-                'q3'  => 6000,
-                'q4'  => 'Kerupuk Ikan Tenggiri Khas Pesisir',
-                'q5'  => 20000,
-                'q6'  => ['Stik Keju Rumput Laut', 'Pastel Kering Isi Abon Ikan'],
-                'q7'  => 10000,
-                'q8'  => 'Rice Bowl Cumi Saus Tiram Telur Mata Sapi',
-                'q9'  => 15000,
-                'q10' => '5',
-                'q11' => '5',
-                'q12' => ['Cita Rasa yang Lezat & Konsisten', 'Kemasan Modern & Praktis Dibawa'],
-                'q13' => '1 - 2 Kali Seminggu',
-                'q14' => 'Kantin & Galeri Kewirausahaan SMKN 2 Indramayu',
-                'q15' => '5',
-                'q16' => 'Pilihan Makan Siang Praktis Berkualitas',
-                'q17' => 'Porsi hemat bundling dengan minuman Susu Numani',
-                'q18' => 'Kolaborasi antara Santap dan Susu Kedelai Numani sangat bagus jika dibuat paket makan siang lengkap. Sangat menghemat pengeluaran siswa.',
-            ],
-            [
-                'nisn' => '0068112017',
-                'q1'  => 'KULINJER (Snack & Kudapan Khas Indramayu)',
-                'q2'  => ['Strawberry Cream', 'Cokelat Belgia'],
-                'q3'  => 5000,
-                'q4'  => 'Abon Ikan Bandeng Tanpa Duri',
-                'q5'  => 17000,
-                'q6'  => ['Stik Keju Rumput Laut', 'Rengginang Mini Aneka Bumbu'],
-                'q7'  => 9000,
-                'q8'  => 'Rice Bowl Ayam Suwir Pedas Kemangi',
-                'q9'  => 14000,
-                'q10' => '4',
-                'q11' => '4',
-                'q12' => ['Harga Bersahabat bagi Pelajar/Guru', 'Mendukung Kreativitas Siswa Sekolah'],
-                'q13' => '2 - 3 Kali Sebulan',
-                'q14' => 'Titip Jual di Koperasi Sekolah',
-                'q15' => '4',
-                'q16' => 'Cemilan Enak Bikin Nagih',
-                'q17' => 'Kemasan zip-lock tebal agar bisa disimpan berhari-hari',
-                'q18' => 'Stik keju rumput laut Kulinjer teksturnya crunchy sekali. Cocok untuk teman nonton atau mengerjakan tugas kelompok.',
-            ],
-            [
-                'nisn' => '0068112018',
-                'q1'  => 'SUSU KEDELAI NUMANI (Minuman Kedelai Alami Aneka Rasa)',
-                'q2'  => ['Original Vanilla', 'Gula Aren Organik'],
-                'q3'  => 6000,
-                'q4'  => 'Nugget Ikan Laut Crispy',
-                'q5'  => 19000,
-                'q6'  => ['Kue Kering Khas Mangga'],
-                'q7'  => 10000,
-                'q8'  => 'Rice Bowl Ikan Asam Manis Sayur Segar',
-                'q9'  => 15000,
-                'q10' => '5',
-                'q11' => '4',
-                'q12' => ['Kebersihan & Legalitas Halal/P-IRT', 'Cita Rasa yang Lezat & Konsisten'],
-                'q13' => 'Hampir Setiap Hari Sekolah (3-5 kali seminggu)',
-                'q14' => 'Kantin & Galeri Kewirausahaan SMKN 2 Indramayu',
-                'q15' => '5',
-                'q16' => 'Nutrisi Alami Rasa Istimewa',
-                'q17' => 'Botol kurva ergonomis 250ml siap bawa',
-                'q18' => 'Susu kedelai gula aren rasanya pas, tidak terlalu manis dan tidak ada endapan ampas kasar. Salut untuk tim Susu Kedelai Numani.',
-            ],
-            [
-                'nisn' => '0068112019',
-                'q1'  => 'JANGKAR MAS (Olahan Ikan & Hasil Laut Pesisir)',
-                'q2'  => ['Matcha Green Tea', 'Cokelat Belgia'],
-                'q3'  => 7000,
-                'q4'  => 'Abon Ikan Bandeng Tanpa Duri',
-                'q5'  => 21000,
-                'q6'  => ['Pastel Kering Isi Abon Ikan'],
-                'q7'  => 11000,
-                'q8'  => 'Nasi Bakar Tongkol Rica-Rica',
-                'q9'  => 16000,
-                'q10' => '5',
-                'q11' => '5',
-                'q12' => ['Cita Rasa yang Lezat & Konsisten', 'Mendukung Kreativitas Siswa Sekolah'],
-                'q13' => '1 - 2 Kali Seminggu',
-                'q14' => 'Pre-Order melalui WhatsApp Bisnis / Grup Kelas',
-                'q15' => '5',
-                'q16' => 'Pelopor Produk Bahari Sekolah',
-                'q17' => 'Kemasan pouch premium kedap udara dengan jendela transparan',
-                'q18' => 'Nasi bakar tongkol dan abon bandeng Jangkar Mas adalah produk yang punya prospek paling cerah untuk dipasarkan keluar Indramayu.',
-            ],
-            [
-                'nisn' => '0068112020',
-                'q1'  => 'SANTAP (Menu Makanan Siap Saji / Rice Bowl)',
-                'q2'  => ['Original Vanilla', 'Cokelat Belgia', 'Kopi Kedelai'],
-                'q3'  => 6000,
-                'q4'  => 'Sambal Cumi / Teri Balado Kemasan',
-                'q5'  => 20000,
-                'q6'  => ['Keripik Tette / Singkong Pedas Manis', 'Stik Keju Rumput Laut'],
-                'q7'  => 10000,
-                'q8'  => 'Rice Bowl Cumi Saus Tiram Telur Mata Sapi',
-                'q9'  => 15000,
-                'q10' => '5',
-                'q11' => '5',
-                'q12' => ['Cita Rasa yang Lezat & Konsisten', 'Harga Bersahabat bagi Pelajar/Guru', 'Kemasan Modern & Praktis Dibawa'],
-                'q13' => '1 - 2 Kali Seminggu',
-                'q14' => 'Kantin & Galeri Kewirausahaan SMKN 2 Indramayu',
-                'q15' => '5',
-                'q16' => 'Solusi Lapar Cepat & Nikmat',
-                'q17' => 'Paket komplit nasi, lauk, telur, kerupuk, dan minuman',
-                'q18' => 'Program kewirausahaan Banper PKK 2026 ini sangat memberdayakan siswa. Semua 4 kelompok menunjukkan inovasi produk yang nyata dan kompetitif di pasaran.',
-            ],
+        $q1Categories = [
+            'SANTAP (Menu Makanan Siap Saji / Rice Bowl)',
+            'SANTAP (Menu Makanan Siap Saji / Rice Bowl)',
+            'SANTAP (Menu Makanan Siap Saji / Rice Bowl)',
+            'SUSU KEDELAI NUMANI (Minuman Kedelai Alami Aneka Rasa)',
+            'SUSU KEDELAI NUMANI (Minuman Kedelai Alami Aneka Rasa)',
+            'JANGKAR MAS (Olahan Ikan & Hasil Laut Pesisir)',
+            'JANGKAR MAS (Olahan Ikan & Hasil Laut Pesisir)',
+            'KULINJER (Snack & Kudapan Khas Indramayu)',
         ];
 
-        // Seed Respondents & Answers
-        foreach ($respondentsData as $data) {
+        $q2SoyFlavorsPool = [
+            ['Cokelat Belgia', 'Matcha Green Tea'],
+            ['Original Vanilla', 'Gula Aren Organik'],
+            ['Original Vanilla', 'Strawberry Cream'],
+            ['Cokelat Belgia', 'Kopi Kedelai'],
+            ['Matcha Green Tea', 'Gula Aren Organik'],
+            ['Original Vanilla', 'Cokelat Belgia', 'Strawberry Cream'],
+            ['Gula Aren Organik'],
+            ['Cokelat Belgia'],
+            ['Original Vanilla'],
+            ['Kopi Kedelai', 'Original Vanilla'],
+            ['Strawberry Cream', 'Cokelat Belgia'],
+            ['Matcha Green Tea', 'Original Vanilla'],
+        ];
+
+        // Q3 WTP Susu Kedelai Numani (Sweet Spot: Rp 5.000 - Rp 6.000)
+        $q3SoyWtpPool = [5000, 5000, 6000, 5000, 6000, 7000, 5000, 6000, 8000, 5000];
+
+        $q4JangkarProducts = [
+            'Sambal Cumi / Teri Balado Kemasan',
+            'Abon Ikan Bandeng Tanpa Duri',
+            'Kerupuk Ikan Tenggiri Khas Pesisir',
+            'Nugget Ikan Laut Crispy',
+            'Sambal Cumi / Teri Balado Kemasan',
+            'Abon Ikan Bandeng Tanpa Duri',
+        ];
+
+        // Q5 WTP Jangkar Mas (Sweet Spot: Rp 20.000)
+        $q5JangkarWtpPool = [15000, 18000, 20000, 20000, 22000, 25000, 18000, 20000, 24000, 19000];
+
+        $q6KulinjerPool = [
+            ['Stik Keju Rumput Laut', 'Rengginang Mini Aneka Bumbu'],
+            ['Keripik Tette / Singkong Pedas Manis'],
+            ['Pastel Kering Isi Abon Ikan', 'Kue Kering Khas Mangga'],
+            ['Keripik Tette / Singkong Pedas Manis', 'Stik Keju Rumput Laut'],
+            ['Stik Keju Rumput Laut'],
+            ['Rengginang Mini Aneka Bumbu'],
+            ['Pastel Kering Isi Abon Ikan'],
+            ['Keripik Tette / Singkong Pedas Manis', 'Kue Kering Khas Mangga'],
+            ['Kue Kering Khas Mangga'],
+            ['Stik Keju Rumput Laut', 'Pastel Kering Isi Abon Ikan'],
+        ];
+
+        // Q7 WTP Kulinjer (Sweet Spot: Rp 10.000)
+        $q7KulinjerWtpPool = [8000, 9000, 10000, 10000, 11000, 12000, 10000, 9000, 10000, 8000];
+
+        $q8SantapMenus = [
+            'Rice Bowl Cumi Saus Tiram Telur Mata Sapi',
+            'Rice Bowl Ayam Suwir Pedas Kemangi',
+            'Rice Bowl Cumi Saus Tiram Telur Mata Sapi',
+            'Rice Bowl Ikan Asam Manis Sayur Segar',
+            'Nasi Bakar Tongkol Rica-Rica',
+            'Rice Bowl Ayam Suwir Pedas Kemangi',
+        ];
+
+        // Q9 WTP Santap (Sweet Spot: Rp 15.000)
+        $q9SantapWtpPool = [13000, 14000, 15000, 15000, 16000, 15000, 18000, 14000, 15000, 16000];
+
+        // Q10 & Q11 Likert (4 & 5 dominate, occasional 3)
+        $likertHighPool = ['5', '5', '4', '5', '4', '5', '4', '4', '5', '3'];
+
+        $q12DecisionFactorsPool = [
+            ['Cita Rasa yang Lezat & Konsisten', 'Harga Bersahabat bagi Pelajar/Guru', 'Kebersihan & Legalitas Halal/P-IRT'],
+            ['Harga Bersahabat bagi Pelajar/Guru', 'Kemasan Modern & Praktis Dibawa'],
+            ['Cita Rasa yang Lezat & Konsisten', 'Mendukung Kreativitas Siswa Sekolah'],
+            ['Cita Rasa yang Lezat & Konsisten', 'Harga Bersahabat bagi Pelajar/Guru'],
+            ['Kebersihan & Legalitas Halal/P-IRT', 'Kemasan Modern & Praktis Dibawa'],
+            ['Harga Bersahabat bagi Pelajar/Guru', 'Cita Rasa yang Lezat & Konsisten'],
+            ['Kebersihan & Legalitas Halal/P-IRT', 'Cita Rasa yang Lezat & Konsisten'],
+            ['Kemasan Modern & Praktis Dibawa', 'Harga Bersahabat bagi Pelajar/Guru'],
+            ['Cita Rasa yang Lezat & Konsisten', 'Kebersihan & Legalitas Halal/P-IRT'],
+            ['Harga Bersahabat bagi Pelajar/Guru', 'Mendukung Kreativitas Siswa Sekolah'],
+        ];
+
+        $q13Frequencies = [
+            '1 - 2 Kali Seminggu',
+            'Hampir Setiap Hari Sekolah (3-5 kali seminggu)',
+            '1 - 2 Kali Seminggu',
+            '2 - 3 Kali Sebulan',
+            '1 - 2 Kali Seminggu',
+            'Hanya Saat Acara Khusus / Bazar Pameran',
+        ];
+
+        $q14Channels = [
+            'Kantin & Galeri Kewirausahaan SMKN 2 Indramayu',
+            'Kantin & Galeri Kewirausahaan SMKN 2 Indramayu',
+            'Pre-Order melalui WhatsApp Bisnis / Grup Kelas',
+            'Bazar Rutin Tiap Hari Jumat di Sekolah',
+            'Titip Jual di Koperasi Sekolah',
+            'Kantin & Galeri Kewirausahaan SMKN 2 Indramayu',
+        ];
+
+        $q16Taglines = [
+            'Rasa Juara Karya Siswa SMKN 2',
+            'Sehat Alami Setiap Hari',
+            'Cita Rasa Bahari Asli Indramayu',
+            'Ngemil Asik Khas Indramayu',
+            'Makan Enak, Cepat & Higienis',
+            'Kesegaran Kedelai Asli Pelajar',
+            'Hasil Laut Juara SMKN 2',
+            'Krenyes Gurih Tradisional Modern',
+            'Santapan Mantap Rasa Hebat',
+            'Energi Kedelai Sehat Setiap Saat',
+            'Ikan Olahan Berkualitas Pesisir',
+            'Kelezatan Nasi Bowl Idola',
+            'Rasa Asli Cemilan Indramayu',
+            'Susu Sehat Generasi Hebat',
+            'Sambal Pesisir Gurih Menggigit',
+            'Pilihan Makan Siang Praktis Berkualitas',
+            'Cemilan Enak Bikin Nagih',
+            'Nutrisi Alami Rasa Istimewa',
+            'Pelopor Produk Bahari Sekolah',
+            'Solusi Lapar Cepat & Nikmat',
+            'Karya Mandiri Rasa Sejati',
+            'Inovasi Kuliner Pelajar Juara',
+            'Lezat Berkelas Harga Pas',
+            'Pangan Sehat Generasi Maju',
+            'Asli Indramayu Rasa Bermutu',
+        ];
+
+        $q17Packagings = [
+            'Paket hemat kombo Rice Bowl Santap plus Susu Kedelai dingin seharga Rp 20.000',
+            'Botol 250ml siap minum dengan segel plastik steril',
+            'Standing pouch ziplock agar kerupuk ikan tetap renyah tahan lama',
+            'Pouch travel pack 100 gram dengan varian pedas berlevel',
+            'Paper bowl ramah lingkungan yang tahan panas microwave',
+            'Cup press atau botol 250ml dengan label komposisi jelas',
+            'Frozen pack vakum 250 gram untuk nugget dan abon ikan',
+            'Kemasan toples mini untuk hampers hari raya atau acara sekolah',
+            'Porsi regular dan jumbo dengan opsi tambahan sambal sachet',
+            'Pouch standing dengan sedotan higienis terbungkus plastik',
+            'Toples segel alumunium foil untuk abon bandeng agar awet 6 bulan',
+            'Bowl bersekat pemisah kuah/saus agar tidak lembek saat dibawa jalan',
+            'Kemasan ekonomis harga Rp 5.000 untuk jajanan harian di kantin',
+            'Sediakan opsi botol 500ml untuk konsumsi keluarga di rumah',
+            'Jar kaca atau plastik food-grade tahan tumpah dengan seal alumunium',
+            'Porsi hemat bundling dengan minuman Susu Numani',
+            'Kemasan zip-lock tebal agar bisa disimpan berhari-hari',
+            'Botol kurva ergonomis 250ml siap bawa',
+            'Kemasan pouch premium kedap udara dengan jendela transparan',
+            'Paket komplit nasi, lauk, telur, kerupuk, dan minuman',
+        ];
+
+        $q18Feedbacks = [
+            'Untuk kelompok Santap, pastikan nasi disajikan hangat dan sambal cuminya tidak terlalu berminyak. Susu kedelai Numani cokelat sangat segar jika disajikan dingin.',
+            'Susu kedelai Numani sangat cocok untuk alternatif minuman sehat pengganti es teh manis. Pertahankan rasa kedelai alami tanpa bau langu.',
+            'Kelompok Jangkar Mas punya potensi besar untuk oleh-oleh khas daerah. Desain labelnya harus dibuat elegan agar bisa dititipkan di minimarket dan rest area.',
+            'Camilan Kulinjer sangat pas untuk teman belajar kelompok. Tingkat kepedasannya mohon dibuat pilihan level 1 sampai 3.',
+            'Penyajian Rice Bowl Santap harus cepat saat jam istirahat agar siswa tidak telat masuk kelas. Rasa cumi saus tiramnya sangat istimewa.',
+            'Susu kedelai Numani rasa stroberi sangat disukai siswi. Harganya kalau bisa tetap Rp 5.000 - Rp 6.000 agar ramah kantong siswa.',
+            'Jangkar Mas membuktikan potensi jurusan perikanan SMKN 2 Indramayu. Nugget ikannya gurih dan tidak amis sama sekali, sangat cocok untuk bekal anak.',
+            'Kulinjer perlu memanfaatkan olahan mangga khas Indramayu lebih optimal sebagai pembeda dengan camilan daerah lain.',
+            'Pilihan lauk seafood di Santap sangat sesuai dengan ciri khas pesisir Indramayu. Pertahankan bumbu gurihnya.',
+            'Kopi kedelai Numani sangat unik! Rasanya pas untuk teman belajar di perpustakaan tanpa membuat asam lambung naik.',
+            'Abon bandeng Jangkar Mas tanpa duri sangat disukai guru dan orang tua murid. Kemasannya sudah layak masuk supermarket.',
+            'Porsi nasi dan lauk ayam suwir kemangi di Santap sangat pas mengenyangkan. Pelayanan ramah dan pesanan via WA cepat ditanggapi.',
+            'Keripik singkong Kulinjer teksturnya sangat renyah dan bumbu pedas manisnya meresap. Sukses terus untuk tim Kulinjer.',
+            'Susu Kedelai Numani Matcha punya aroma teh hijau yang wangi dan manisnya seimbang. Sangat direkomendasikan untuk program gizi anak.',
+            'Sambal cumi Jangkar Mas cuminya melimpah dan tidak pelit. Rasa pedasnya pas di lidah masyarakat Jawa Barat.',
+            'Kolaborasi antara Santap dan Susu Kedelai Numani sangat bagus jika dibuat paket makan siang lengkap. Sangat menghemat pengeluaran siswa.',
+            'Stik keju rumput laut Kulinjer teksturnya crunchy sekali. Cocok untuk teman nonton atau mengerjakan tugas kelompok.',
+            'Susu kedelai gula aren rasanya pas, tidak terlalu manis dan tidak ada endapan ampas kasar. Salut untuk tim Susu Kedelai Numani.',
+            'Nasi bakar tongkol dan abon bandeng Jangkar Mas adalah produk yang punya prospek paling cerah untuk dipasarkan keluar Indramayu.',
+            'Program kewirausahaan Banper PKK 2026 ini sangat memberdayakan siswa. Semua 4 kelompok menunjukkan inovasi produk yang nyata dan kompetitif di pasaran.',
+            'Seluruh produk sudah sangat baik, tingkatkan konsistensi stok agar tidak cepat habis saat jam istirahat kedua.',
+            'Promosi di media sosial seperti Instagram dan TikTok perlu diperbanyak dengan video proses pembuatan yang higienis.',
+            'Sediakan pembayaran non-tunai seperti QRIS di stan galeri agar transaksi siswa dan guru lebih praktis.',
+            'Rasa bumbu olahan laut Jangkar Mas sangat kaya rempah, sangat membanggakan sekolah perikanan kita.',
+            'Pertahankan kualitas bahan baku alami tanpa pengawet berbahaya agar konsumen setia terus bertambah.',
+        ];
+
+        // ═════════════════════════════════════════════════════════════════════
+        // GENERATE 125 RESPONDENTS & ANSWERS
+        // ═════════════════════════════════════════════════════════════════════
+        $totalTargetRespondents = 125;
+
+        for ($i = 1; $i <= $totalTargetRespondents; $i++) {
+            $nisn = sprintf('006811%04d', $i);
+            $submittedAt = now()->subDays(rand(1, 12))->subHours(rand(1, 14))->subMinutes(rand(1, 55));
+
             $resp = Respondent::create([
                 'survey_id'    => $survey->id,
-                'nisn'         => $data['nisn'],
-                'submitted_at' => now()->subDays(rand(1, 6))->subHours(rand(1, 12)),
+                'nisn'         => $nisn,
+                'submitted_at' => $submittedAt,
             ]);
 
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[0]->id,  'jawaban' => $data['q1']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[1]->id,  'jawaban' => json_encode($data['q2'])]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[2]->id,  'jawaban' => (string)$data['q3']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[3]->id,  'jawaban' => $data['q4']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[4]->id,  'jawaban' => (string)$data['q5']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[5]->id,  'jawaban' => json_encode($data['q6'])]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[6]->id,  'jawaban' => (string)$data['q7']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[7]->id,  'jawaban' => $data['q8']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[8]->id,  'jawaban' => (string)$data['q9']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[9]->id,  'jawaban' => $data['q10']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[10]->id, 'jawaban' => $data['q11']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[11]->id, 'jawaban' => json_encode($data['q12'])]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[12]->id, 'jawaban' => $data['q13']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[13]->id, 'jawaban' => $data['q14']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[14]->id, 'jawaban' => $data['q15']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[15]->id, 'jawaban' => $data['q16']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[16]->id, 'jawaban' => $data['q17']]);
-            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[17]->id, 'jawaban' => $data['q18']]);
+            $ansQ1  = $q1Categories[($i - 1) % count($q1Categories)];
+            $ansQ2  = $q2SoyFlavorsPool[($i - 1) % count($q2SoyFlavorsPool)];
+            $ansQ3  = (string) $q3SoyWtpPool[($i - 1) % count($q3SoyWtpPool)];
+            $ansQ4  = $q4JangkarProducts[($i - 1) % count($q4JangkarProducts)];
+            $ansQ5  = (string) $q5JangkarWtpPool[($i - 1) % count($q5JangkarWtpPool)];
+            $ansQ6  = $q6KulinjerPool[($i - 1) % count($q6KulinjerPool)];
+            $ansQ7  = (string) $q7KulinjerWtpPool[($i - 1) % count($q7KulinjerWtpPool)];
+            $ansQ8  = $q8SantapMenus[($i - 1) % count($q8SantapMenus)];
+            $ansQ9  = (string) $q9SantapWtpPool[($i - 1) % count($q9SantapWtpPool)];
+            $ansQ10 = $likertHighPool[($i - 1) % count($likertHighPool)];
+            $ansQ11 = $likertHighPool[($i + 1) % count($likertHighPool)];
+            $ansQ12 = $q12DecisionFactorsPool[($i - 1) % count($q12DecisionFactorsPool)];
+            $ansQ13 = $q13Frequencies[($i - 1) % count($q13Frequencies)];
+            $ansQ14 = $q14Channels[($i - 1) % count($q14Channels)];
+            $ansQ15 = $likertHighPool[($i + 2) % count($likertHighPool)];
+            $ansQ16 = $q16Taglines[($i - 1) % count($q16Taglines)];
+            $ansQ17 = $q17Packagings[($i - 1) % count($q17Packagings)];
+            $ansQ18 = $q18Feedbacks[($i - 1) % count($q18Feedbacks)];
+
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[0]->id,  'jawaban' => $ansQ1]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[1]->id,  'jawaban' => json_encode($ansQ2)]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[2]->id,  'jawaban' => $ansQ3]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[3]->id,  'jawaban' => $ansQ4]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[4]->id,  'jawaban' => $ansQ5]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[5]->id,  'jawaban' => json_encode($ansQ6)]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[6]->id,  'jawaban' => $ansQ7]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[7]->id,  'jawaban' => $ansQ8]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[8]->id,  'jawaban' => $ansQ9]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[9]->id,  'jawaban' => $ansQ10]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[10]->id, 'jawaban' => $ansQ11]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[11]->id, 'jawaban' => json_encode($ansQ12)]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[12]->id, 'jawaban' => $ansQ13]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[13]->id, 'jawaban' => $ansQ14]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[14]->id, 'jawaban' => $ansQ15]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[15]->id, 'jawaban' => $ansQ16]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[16]->id, 'jawaban' => $ansQ17]);
+            Answer::create(['respondent_id' => $resp->id, 'question_id' => $createdQuestions[17]->id, 'jawaban' => $ansQ18]);
         }
 
-        $this->command->info('[OK] BanperPkkStudyCaseSeeder berhasil: 1 Survey Banper PKK 2026, 18 Pertanyaan, 20 Responden Terverifikasi.');
+        $this->command->info("[OK] BanperPkkStudyCaseSeeder berhasil: 1 Survey Banper PKK 2026, 18 Pertanyaan, {$totalTargetRespondents} Responden Terverifikasi.");
     }
 }
