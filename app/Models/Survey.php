@@ -19,6 +19,8 @@ class Survey extends Model
         'judul',
         'deskripsi',
         'status',
+        'share_token',
+        'public_analytics_enabled',
         'accepting_responses',
         'closed_at',
         'custom_closed_message',
@@ -30,13 +32,14 @@ class Survey extends Model
     ];
 
     protected $casts = [
-        'accepting_responses' => 'boolean',
-        'closed_at'           => 'datetime',
-        'limit_one_response'  => 'boolean',
-        'tanggal_mulai'       => 'date',
-        'tanggal_selesai'     => 'date',
-        'ai_analysis'         => 'array',
-        'ai_analyzed_at'      => 'datetime',
+        'public_analytics_enabled' => 'boolean',
+        'accepting_responses'      => 'boolean',
+        'closed_at'                => 'datetime',
+        'limit_one_response'       => 'boolean',
+        'tanggal_mulai'            => 'date',
+        'tanggal_selesai'          => 'date',
+        'ai_analysis'              => 'array',
+        'ai_analyzed_at'           => 'datetime',
     ];
 
     /**
@@ -105,7 +108,15 @@ class Survey extends Model
             if (empty($model->id)) {
                 $model->id = (string) Str::uuid();
             }
+            if (empty($model->share_token)) {
+                $model->share_token = Str::random(32);
+            }
         });
+    }
+
+    public function getShareUrlAttribute(): string
+    {
+        return $this->share_token ? route('analytics.share', $this->share_token) : '';
     }
 
     public function user()

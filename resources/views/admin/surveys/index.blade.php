@@ -11,12 +11,14 @@
             <h1 class="font-serif font-bold text-2xl md:text-3xl text-ink">Manajemen Survey</h1>
             <p class="text-xs mt-1" style="color:#6E675F;">Buat, kelola, dan publikasikan survey riset pasar untuk program kewirausahaan.</p>
         </div>
+        @if(auth()->user()?->isAdmin())
         <a href="{{ route('admin.surveys.create') }}"
            class="inline-flex items-center gap-2 px-5 py-3 text-white font-bold text-xs rounded-xl transition shadow-sm shrink-0 active:scale-95"
            style="background:#1C1917;">
             <svg class="w-4 h-4" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             <span>Buat Survey Baru</span>
         </a>
+        @endif
     </div>
 
     <!-- ── Filter Tabs ───────────────────────────────────────────────────── -->
@@ -56,11 +58,13 @@
             <div class="text-6xl mb-4">📋</div>
             <h2 class="font-serif font-bold text-xl text-ink">Belum Ada Survey</h2>
             <p class="text-xs mt-2 mb-6" style="color:#6E675F;">Klik tombol di atas untuk membuat survey riset pasar pertama Anda.</p>
+            @if(auth()->user()?->isAdmin())
             <a href="{{ route('admin.surveys.create') }}"
                class="inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-bold rounded-xl transition"
                style="background:#1C1917;">
                 Buat Survey Pertama
             </a>
+            @endif
         </div>
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -143,17 +147,30 @@
                 <!-- Card Footer Actions -->
                 <div class="px-5 py-3.5 border-t flex items-center justify-between gap-2" style="border-color:#EBE6DE;">
                     <div class="flex items-center gap-2 flex-1">
+                        <a href="{{ route('admin.surveys.analytics', $survey->id) }}"
+                           class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold border rounded-xl transition shadow-xs"
+                           style="background:#1C1917; color:#FFFFFF;"
+                           onmouseover="this.style.background='#2C2723';"
+                           onmouseout="this.style.background='#1C1917';">
+                            <svg class="w-3.5 h-3.5" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            <span>Analitik & AI</span>
+                        </a>
+
+                        @if(auth()->user()?->isAdmin())
                         <a href="{{ route('admin.surveys.builder', $survey->id) }}"
-                           class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold border rounded-xl transition"
+                           class="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold border rounded-xl transition"
                            style="background:#FAF8F5; border-color:#E5E0D8; color:#1C1917;"
                            onmouseover="this.style.background='#F4F0E8';"
-                           onmouseout="this.style.background='#FAF8F5';">
+                           onmouseout="this.style.background='#FAF8F5';"
+                           title="Kelola Pertanyaan (Builder)">
                             <svg class="w-3.5 h-3.5" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            <span>Kelola Pertanyaan (Builder)</span>
+                            <span>Builder</span>
                         </a>
+                        @endif
                     </div>
 
-                    <!-- Tombol Hapus Survey Per Project -->
+                    @if(auth()->user()?->isAdmin())
+                    <!-- Tombol Hapus Survey Per Project (Khusus Admin) -->
                     <form method="POST" action="{{ route('admin.surveys.destroy', $survey->id) }}"
                           onsubmit="return confirm('Apakah Anda yakin ingin menghapus survey \'{{ addslashes($survey->judul) }}\' beserta seluruh data respondennya? Tindakan ini tidak dapat dibatalkan.')">
                         @csrf @method('DELETE')
@@ -167,6 +184,7 @@
                             </svg>
                         </button>
                     </form>
+                    @endif
                 </div>
             </div>
             @endforeach

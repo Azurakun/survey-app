@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -45,5 +46,29 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Check if user is an Administrator (full CRUD & management access)
+     */
+    public function isAdmin(): bool
+    {
+        return strtoupper($this->role ?? 'ADMIN') === 'ADMIN';
+    }
+
+    /**
+     * Check if user is a Viewer / Read-Only user
+     */
+    public function isViewer(): bool
+    {
+        return strtoupper($this->role ?? '') === 'VIEWER';
+    }
+
+    /**
+     * Human-readable role label
+     */
+    public function getRoleBadgeLabel(): string
+    {
+        return $this->isAdmin() ? 'Administrator' : 'Pengamat (Viewer)';
     }
 }

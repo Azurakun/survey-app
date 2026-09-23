@@ -14,14 +14,26 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // ─── Admin User ────────────────────────────────────────────────
+        // ─── Admin & Viewer Users ─────────────────────────────────────
         $admin = User::firstOrCreate(
             ['email' => 'admin@smkn2indramayu.sch.id'],
             [
                 'name'     => 'Admin Kewirausahaan',
                 'password' => Hash::make('admin123'),
+                'role'     => 'ADMIN',
             ]
         );
+        $admin->update(['role' => 'ADMIN']);
+
+        $viewer = User::firstOrCreate(
+            ['email' => 'viewer@smkn2indramayu.sch.id'],
+            [
+                'name'     => 'Guru Penilai / Pengamat',
+                'password' => Hash::make('viewer123'),
+                'role'     => 'VIEWER',
+            ]
+        );
+        $viewer->update(['role' => 'VIEWER']);
 
         // Wipe old survey data to populate 3 brand new 180-degree distinct surveys
         Survey::query()->delete();

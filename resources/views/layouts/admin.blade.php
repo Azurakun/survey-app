@@ -228,7 +228,14 @@
                     {{ Str::upper(Str::substr(Auth::user()->name ?? 'A', 0, 1)) }}
                 </div>
                 <div class="min-w-0 flex-1">
-                    <div class="text-[11px] font-bold truncate text-ink">{{ Auth::user()->name ?? 'Guru Pengelola' }}</div>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[11px] font-bold truncate text-ink">{{ Auth::user()->name ?? 'Pengguna' }}</span>
+                        @if(Auth::user()?->isAdmin())
+                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md uppercase" style="background:#FAF6EE; color:#C89D54; border:1px solid #E8DCBE;">ADMIN</span>
+                        @else
+                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md uppercase" style="background:#EFF6FF; color:#2563EB; border:1px solid #BFDBFE;">VIEWER</span>
+                        @endif
+                    </div>
                     <div class="text-[10px] truncate" style="color:#A19A91;">{{ Auth::user()->email ?? 'admin@domain.sch.id' }}</div>
                 </div>
                 <svg class="w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor">

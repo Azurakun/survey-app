@@ -30,6 +30,19 @@
             </div>
         </div>
         <div class="flex items-center gap-2.5 flex-wrap">
+            <!-- Share Results Button -->
+            <button type="button" @click="shareModalOpen = true"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 border font-bold text-xs rounded-xl transition shadow-xs cursor-pointer"
+                    style="background:#FAF8F5; border-color:#E5E0D8; color:#1C1917;"
+                    onmouseover="this.style.background='#F4F0E8';"
+                    onmouseout="this.style.background='#FAF8F5';">
+                <svg class="w-4 h-4" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                <span>Bagikan Hasil</span>
+                <span x-show="shareEnabled" class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" title="Link Publik Aktif"></span>
+            </button>
+
             <a href="{{ route('admin.surveys.export', $survey->id) }}"
                class="inline-flex items-center gap-2 px-4 py-2.5 text-white font-bold text-xs rounded-xl transition shadow-xs"
                style="background:#1C1917;"
@@ -38,6 +51,8 @@
                 <svg class="w-4 h-4" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                 <span>Ekspor XLSX</span>
             </a>
+
+            @if(auth()->user()?->isAdmin())
             <a href="{{ route('admin.surveys.builder', $survey->id) }}"
                class="inline-flex items-center gap-2 px-4 py-2.5 border font-bold text-xs rounded-xl transition"
                style="background:#FAF8F5; border-color:#E5E0D8; color:#1C1917;"
@@ -46,6 +61,7 @@
                 <svg class="w-4 h-4" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 <span>Builder</span>
             </a>
+            @endif
         </div>
     </div>
 
@@ -219,12 +235,20 @@
                         <span>Syarat Minimal Responden ({{ $totalRespondents }}/5)</span>
                     </button>
                 @else
+                    @if(auth()->user()?->isAdmin())
                     <button type="button" @click="activeView = 'AI_ANALYTICS'; regenerateAi();"
                             class="px-4 py-2.5 text-xs font-bold rounded-xl text-white transition shadow-xs whitespace-nowrap cursor-pointer flex items-center gap-2"
                             style="background:#C89D54;">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         ✨ Generate Analisa AI
                     </button>
+                    @else
+                    <button type="button" @click="activeView = 'AI_ANALYTICS'"
+                            class="px-4 py-2.5 text-xs font-bold rounded-xl text-white transition shadow-xs whitespace-nowrap cursor-pointer flex items-center gap-2"
+                            style="background:#1C1917;">
+                        Lihat Tab AI →
+                    </button>
+                    @endif
                 @endif
             </div>
         </template>
@@ -745,6 +769,7 @@
                             Data survei dari <span class="font-bold text-stone-900">{{ $totalRespondents }} responden</span> telah terkumpul. Klik tombol di bawah ini untuk memulai analisa AI dalam mengevaluasi sentimen pasar, estimasi harga WTP, serta menyusun rekomendasi strategi kewirausahaan 100% grounded dari hasil survei nyata.
                         </p>
                     </div>
+                    @if(auth()->user()?->isAdmin())
                     <div class="pt-2">
                         <button type="button" @click="regenerateAi()" :disabled="aiLoading"
                                 class="px-6 py-3 rounded-xl font-bold text-sm text-white shadow-sm transition-all duration-200 inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
@@ -753,6 +778,9 @@
                             ✨ Generate Analisa AI Sekarang
                         </button>
                     </div>
+                    @else
+                    <p class="text-xs text-stone-500 italic mt-2">Hanya Administrator yang memiliki wewenang untuk generate analisa AI.</p>
+                    @endif
                 @endif
             </div>
         </template>
@@ -788,10 +816,12 @@
                                 </p>
                             </div>
                         </div>
+                        @if(auth()->user()?->isAdmin())
                         <button type="button" @click="deleteAi()" :disabled="aiLoading"
                                 class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-700 hover:bg-rose-800 transition shrink-0 whitespace-nowrap cursor-pointer shadow-xs">
                             Hapus Hasil Analisa
                         </button>
+                        @endif
                     </div>
                 @endif
                 
@@ -817,41 +847,43 @@
                             <span>Cetak / PDF</span>
                         </a>
 
-                        @if($totalRespondents < 5)
-                            <button type="button" disabled
-                                    title="Minimal 5 responden diperlukan untuk generate ulang"
-                                    class="px-4 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-2 cursor-not-allowed opacity-50 bg-stone-100 text-stone-400 border-stone-300">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                <span>Perlu Min. 5 Responden</span>
-                            </button>
-                        @else
-                            <button type="button" @click="regenerateAi()" :disabled="aiLoading"
-                                    class="px-4 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                                    style="background:#FAF8F5; border-color:#E5E0D8; color:#1C1917;">
-                                <template x-if="!aiLoading">
-                                    <span class="flex items-center gap-1.5">
-                                        <svg class="w-3.5 h-3.5" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                        Generate Ulang AI
-                                    </span>
-                                </template>
-                                <template x-if="aiLoading">
-                                    <span class="flex items-center gap-1.5">
-                                        <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Memproses...
-                                    </span>
-                                </template>
+                        @if(auth()->user()?->isAdmin())
+                            @if($totalRespondents < 5)
+                                <button type="button" disabled
+                                        title="Minimal 5 responden diperlukan untuk generate ulang"
+                                        class="px-4 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-2 cursor-not-allowed opacity-50 bg-stone-100 text-stone-400 border-stone-300">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                    <span>Perlu Min. 5 Responden</span>
+                                </button>
+                            @else
+                                <button type="button" @click="regenerateAi()" :disabled="aiLoading"
+                                        class="px-4 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                                        style="background:#FAF8F5; border-color:#E5E0D8; color:#1C1917;">
+                                    <template x-if="!aiLoading">
+                                        <span class="flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                            Generate Ulang AI
+                                        </span>
+                                    </template>
+                                    <template x-if="aiLoading">
+                                        <span class="flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Memproses...
+                                        </span>
+                                    </template>
+                                </button>
+                            @endif
+
+                            <button type="button" @click="deleteAi()" :disabled="aiLoading"
+                                    class="px-3.5 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                                    style="background:#FDECEA; border-color:#F5B7B1; color:#922B21;">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                <span>Hapus Hasil</span>
                             </button>
                         @endif
-
-                        <button type="button" @click="deleteAi()" :disabled="aiLoading"
-                                class="px-3.5 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                                style="background:#FDECEA; border-color:#F5B7B1; color:#922B21;">
-                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            <span>Hapus Hasil</span>
-                        </button>
                     </div>
                 </div>
 
@@ -1100,13 +1132,15 @@
                                             style="background:#FAF8F5; border-color:#E5E0D8; color:#1C1917;">
                                         Lihat Jawaban
                                     </button>
+                                    @if(auth()->user()?->isAdmin())
                                     <form method="POST" action="{{ route('admin.respondents.destroy', $resp->id) }}" onsubmit="return confirm('Hapus responden NISN {{ $resp->nisn }}?');" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="p-1.5 rounded-lg border text-red-600 hover:bg-red-50 transition" style="border-color:#F5B7B1;">
+                                        <button type="submit" class="p-1.5 rounded-lg border text-red-600 hover:bg-red-50 transition cursor-pointer" style="border-color:#F5B7B1;" title="Hapus Responden">
                                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </form>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -1144,7 +1178,109 @@
         </div>
     </div>
 
-</div>
+    <!-- ── Modal Bagikan Hasil Analitik Publik ───────────────────────────── -->
+    <div x-show="shareModalOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" style="display:none;">
+        <div @click.away="shareModalOpen = false" class="card w-full max-w-lg p-6 space-y-5 animate-pop-in" style="background:#FFFFFF;">
+            <!-- Modal Header -->
+            <div class="flex items-start justify-between pb-3 border-b" style="border-color:#E5E0D8;">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:#F8F4EC; border:1px solid #E5E0D8;">
+                        <svg class="w-5 h-5" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-serif font-bold text-base text-ink">Bagikan Hasil & Analitik Survey</h3>
+                        <p class="text-xs text-stone-500">Tautan publik untuk melihat visualisasi dan intelijen pasar tanpa login</p>
+                    </div>
+                </div>
+                <button type="button" @click="shareModalOpen = false" class="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition cursor-pointer">✕</button>
+            </div>
+
+            <!-- Toggle Switch Box -->
+            <div class="p-4 rounded-xl border flex items-center justify-between gap-4" style="background:#FAF8F5; border-color:#E5E0D8;">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-ink">Akses Link Publik</span>
+                        <template x-if="shareEnabled">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">Aktif</span>
+                        </template>
+                        <template x-if="!shareEnabled">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-200 text-stone-600">Nonaktif</span>
+                        </template>
+                    </div>
+                    <p class="text-[11px] text-stone-500 mt-0.5">
+                        <template x-if="shareEnabled">
+                            <span>Siapapun dengan link dapat melihat ringkasan & AI survey ini.</span>
+                        </template>
+                        <template x-if="!shareEnabled">
+                            <span>Link publik ditutup. Pengunjung akan melihat halaman disabled.</span>
+                        </template>
+                    </p>
+                </div>
+                @if(auth()->user()?->isAdmin())
+                <!-- Toggle switch button -->
+                <button type="button" @click="toggleShare()" :disabled="shareLoading"
+                        :class="shareEnabled ? 'bg-emerald-600' : 'bg-stone-300'"
+                        class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50"
+                        role="switch" :aria-checked="shareEnabled">
+                    <span :class="shareEnabled ? 'translate-x-5' : 'translate-x-0'"
+                          class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                </button>
+                @else
+                <span class="text-[10px] text-stone-400 italic">Khusus Admin</span>
+                @endif
+            </div>
+
+            <!-- Share URL Input and Copy -->
+            <div class="space-y-2">
+                <label class="block text-[10px] font-sans uppercase tracking-widest font-bold" style="color:#6E675F;">Tautan Publik</label>
+                <div class="flex items-center gap-2">
+                    <input type="text" readonly :value="shareUrl"
+                           class="w-full text-xs font-mono font-medium px-3.5 py-2.5 rounded-xl border select-all"
+                           style="background:#FAF8F5; border-color:#E5E0D8; color:#1C1917;">
+                    <button type="button" @click="copyShareUrl()"
+                            class="px-4 py-2.5 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1.5 shadow-xs cursor-pointer"
+                            style="background:#1C1917; color:#FFFFFF;">
+                        <svg class="w-3.5 h-3.5" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <span>Salin</span>
+                    </button>
+                </div>
+                <div x-show="shareCopied" x-transition class="text-xs font-bold text-emerald-600 flex items-center gap-1 pt-1">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span>Tautan berhasil disalin ke clipboard!</span>
+                </div>
+            </div>
+
+            <!-- Action buttons: Preview & Regenerate -->
+            <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t" style="border-color:#E5E0D8;">
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <a :href="shareUrl" target="_blank"
+                       class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl border transition"
+                       style="background:#FAF8F5; border-color:#E5E0D8; color:#1C1917;"
+                       onmouseover="this.style.background='#F4F0E8';"
+                       onmouseout="this.style.background='#FAF8F5';">
+                        <svg class="w-3.5 h-3.5" style="color:#C89D54;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        <span>Buka Pratinjau ↗</span>
+                    </a>
+                    @if(auth()->user()?->isAdmin())
+                    <button type="button" @click="regenerateToken()" :disabled="shareLoading"
+                            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border transition text-stone-600 hover:text-stone-900 border-stone-200 hover:bg-stone-50 disabled:opacity-50 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span>Reset Link Baru</span>
+                    </button>
+                    @endif
+                </div>
+                <button type="button" @click="shareModalOpen = false"
+                        class="w-full sm:w-auto px-4 py-2 font-bold text-xs rounded-xl border cursor-pointer"
+                        style="background:#1C1917; color:#FFFFFF;">
+                    Selesai
+                </button>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
@@ -1454,6 +1590,13 @@ function analyticsApp() {
         detailNisn: '',
         detailAnswers: [],
 
+        // Public Shareable Analytics State
+        shareModalOpen: false,
+        shareEnabled: {{ $survey->public_analytics_enabled ? 'true' : 'false' }},
+        shareUrl: '{{ $survey->share_url }}',
+        shareCopied: false,
+        shareLoading: false,
+
         init() {
             this.$watch('activeView', (view) => {
                 if (view === 'SUMMARY') {
@@ -1599,6 +1742,67 @@ function analyticsApp() {
                 this.detailAnswers = [];
             }
             this.detailOpen = true;
+        },
+
+        async toggleShare() {
+            this.shareLoading = true;
+            try {
+                const res = await fetch('{{ route("admin.surveys.toggle-share", $survey->id) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.shareEnabled = data.enabled;
+                    this.shareUrl = data.share_url;
+                } else {
+                    alert('Gagal mengubah status tautan publik.');
+                }
+            } catch (e) {
+                alert('Terjadi kesalahan: ' + e.message);
+            } finally {
+                this.shareLoading = false;
+            }
+        },
+
+        async regenerateToken() {
+            if (!confirm('Apakah Anda yakin ingin mengganti token tautan publik? Tautan yang lama akan langsung kedaluwarsa dan tidak bisa diakses lagi.')) {
+                return;
+            }
+            this.shareLoading = true;
+            try {
+                const res = await fetch('{{ route("admin.surveys.regenerate-share-token", $survey->id) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.shareUrl = data.share_url;
+                    alert('Tautan publik baru berhasil digenerate.');
+                } else {
+                    alert('Gagal meregenerasi tautan publik.');
+                }
+            } catch (e) {
+                alert('Terjadi kesalahan: ' + e.message);
+            } finally {
+                this.shareLoading = false;
+            }
+        },
+
+        copyShareUrl() {
+            if (!this.shareUrl) return;
+            navigator.clipboard.writeText(this.shareUrl).then(() => {
+                this.shareCopied = true;
+                setTimeout(() => this.shareCopied = false, 2500);
+            });
         }
     }
 }
